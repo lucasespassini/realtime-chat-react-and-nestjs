@@ -6,7 +6,10 @@ import {
 } from '@nestjs/websockets';
 import { MessageService } from './message.service';
 import { Server } from 'socket.io';
+import { UseGuards } from '@nestjs/common';
+import { JwtGuard } from 'src/auth/guards/jwt.guard';
 
+@UseGuards(JwtGuard)
 @WebSocketGateway({ cors: true })
 export class MessageGateway {
   constructor(private readonly messageService: MessageService) {}
