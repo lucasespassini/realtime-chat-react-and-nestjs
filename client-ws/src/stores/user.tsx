@@ -1,11 +1,5 @@
 import { create } from "zustand";
-
-export type SocketUser = {
-  socketId: string;
-  ulid: string;
-  username: string;
-  isOnline: boolean;
-};
+import { SocketUser } from "../constants/Types";
 
 type UserStore = {
   users: SocketUser[];
