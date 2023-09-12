@@ -1,9 +1,9 @@
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
+import { useEffect } from "react";
 import { AuthPage } from "../pages/AuthPage";
 import { HomePage } from "../pages/HomePage";
-import { Header } from "../components/header";
 import { useAuthStore } from "../stores/auth";
-import { useEffect } from "react";
+import { Header } from "../components/Header";
 
 interface PrivateRouteProps {
   children: JSX.Element;
@@ -12,9 +12,7 @@ interface PrivateRouteProps {
 export const AppRoutes = () => {
   const { isAuthenticated, authenticate } = useAuthStore();
 
-  useEffect(() => {
-    authenticate();
-  }, [authenticate]);
+  useEffect(() => authenticate(), [authenticate]);
 
   const PrivateRoute = ({ children }: PrivateRouteProps) =>
     isAuthenticated ? (

@@ -5,14 +5,12 @@ import { PrismaService } from '../prisma/prisma.service';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 import { JwtStrategyService } from './guards/jwt-strategy.service';
-import { AuthGateway } from './auth.gateway';
 
 @Module({
   imports: [
     JwtModule.registerAsync({
       imports: [ConfigModule],
       useFactory: async (configService: ConfigService) => {
-        console.log(configService.get<string>('JWT_SECRET'));
         return {
           secret: configService.get<string>('JWT_SECRET'),
           signOptions: {
@@ -24,7 +22,7 @@ import { AuthGateway } from './auth.gateway';
     }),
   ],
   controllers: [AuthController],
-  providers: [AuthGateway, AuthService, JwtStrategyService, PrismaService],
+  providers: [AuthService, JwtStrategyService, PrismaService],
   exports: [AuthService],
 })
 export class AuthModule {}

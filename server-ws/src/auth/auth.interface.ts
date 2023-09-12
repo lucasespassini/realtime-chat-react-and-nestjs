@@ -4,7 +4,7 @@ export interface Payload {
 }
 
 export interface SocketUser {
-  socket_id: string;
+  socketId: string;
   ulid: string;
   username: string;
 }

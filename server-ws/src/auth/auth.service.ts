@@ -23,12 +23,11 @@ export class AuthService {
   }
 
   async signup(authDto: AuthDto) {
+    if (!authDto.username || !authDto.password) throw new BadRequestException();
+
     const user = await this.prisma.users.findUnique({
       where: { usr_username: authDto.username },
     });
-
-    if (!authDto?.username || !authDto?.password)
-      throw new BadRequestException();
 
     if (user)
       throw new NotFoundException('Usuário com mesmo nome já cadastrado!');
@@ -50,6 +49,8 @@ export class AuthService {
   }
 
   async signin(authDto: AuthDto) {
+    if (!authDto.username || !authDto.password) throw new BadRequestException();
+
     const user = await this.prisma.users.findUnique({
       where: { usr_username: authDto.username },
     });

@@ -1,14 +1,6 @@
 import {
   Button,
-  Card,
-  CardBody,
-  CardFooter,
-  CardHeader,
   Flex,
-  FormControl,
-  FormLabel,
-  Heading,
-  Input,
   Tab,
   TabList,
   TabPanel,
@@ -17,8 +9,9 @@ import {
   useToast,
 } from "@chakra-ui/react";
 import { useCallback, useState } from "react";
-import { useAuthStore } from "../stores/auth";
 import { useNavigate } from "react-router-dom";
+import { useAuthStore } from "../stores/auth";
+import { FormInput } from "../components/Form/FormInput";
 
 type FormData = {
   username: string;
@@ -31,124 +24,120 @@ export const AuthPage = () => {
   const { signin, signup } = useAuthStore();
 
   const [formData, setFormData] = useState({} as FormData);
+  const [isSignup, setIsSignup] = useState(false);
 
-  const Cadastro = useCallback(async () => {
-    try {
-      await signup(formData.username, formData.password);
-      navigate("/");
-    } catch (error) {
-      toast({
-        title: "Ocorreu um erro.",
-        description: error.response.data.message,
-        isClosable: true,
-        status: "error",
-        duration: 3000,
-      });
-    }
-  }, [formData.password, formData.username, navigate, signup, toast]);
+  const submit = useCallback(
+    async (e: React.FormEvent) => {
+      e.preventDefault();
+      try {
+        isSignup ? await signup(formData) : await signin(formData);
 
-  const Entrar = useCallback(async () => {
-    try {
-      await signin(formData.username, formData.password);
-      navigate("/");
-    } catch (error) {
-      toast({
-        title: "Ocorreu um erro.",
-        description: error.response.data.message,
-        isClosable: true,
-        status: "error",
-        duration: 3000,
-      });
-    }
-  }, [formData.password, formData.username, navigate, signin, toast]);
+        navigate("/");
+      } catch (error) {
+        toast({
+          title: "Ocorreu um erro.",
+          description: error?.response?.data?.message,
+          isClosable: true,
+          status: "error",
+          duration: 3000,
+        });
+      }
+    },
+    [isSignup, signup, formData, signin, navigate, toast]
+  );
 
   return (
     <Flex h="100vh" alignItems="center" justifyContent="center" gap={5}>
       <Tabs
         isFitted
         variant="enclosed"
-        onChange={() => setFormData({} as FormData)}
+        onChange={(i) => {
+          setIsSignup(!!i);
+          setFormData({} as FormData);
+        }}
       >
         <TabList>
-          <Tab>Login</Tab>
-          <Tab>Cadastro</Tab>
+          <Tab
+            _selected={{
+              color: "#94a3b8",
+              borderColor: "#94a3b8",
+              borderBottomColor: "#fff",
+            }}
+          >
+            Login
+          </Tab>
+          <Tab
+            _selected={{
+              color: "#94a3b8",
+              borderColor: "#94a3b8",
+              borderBottomColor: "#fff",
+            }}
+          >
+            Cadastro
+          </Tab>
         </TabList>
 
         <TabPanels>
-          <TabPanel>
-            <Card w="400px">
-              <CardHeader>
-                <Heading size="md">Entrar</Heading>
-              </CardHeader>
+          <TabPanel
+            as="form"
+            w="400px"
+            my={5}
+            display="flex"
+            flexDir="column"
+            gap={7}
+            onSubmit={submit}
+          >
+            <FormInput
+              label="Nome"
+              value={formData.username || ""}
+              onChange={(e) =>
+                setFormData({ ...formData, username: e.target.value })
+              }
+            />
 
-              <CardBody>
-                <FormControl>
-                  <FormLabel>Nome</FormLabel>
-                  <Input
-                    type="text"
-                    value={formData.username || ""}
-                    onChange={(e) =>
-                      setFormData({ ...formData, username: e.target.value })
-                    }
-                  />
-                </FormControl>
+            <FormInput
+              type="password"
+              label="Senha"
+              value={formData.password || ""}
+              onChange={(e) =>
+                setFormData({ ...formData, password: e.target.value })
+              }
+            />
 
-                <FormControl>
-                  <FormLabel>Senha</FormLabel>
-                  <Input
-                    type="password"
-                    value={formData.password || ""}
-                    onChange={(e) =>
-                      setFormData({ ...formData, password: e.target.value })
-                    }
-                  />
-                </FormControl>
-              </CardBody>
-
-              <CardFooter>
-                <Button colorScheme="whatsapp" onClick={Entrar}>
-                  Entrar
-                </Button>
-              </CardFooter>
-            </Card>
+            <Button mt={5} type="submit" colorScheme="whiteAlpha">
+              Entrar
+            </Button>
           </TabPanel>
 
-          <TabPanel>
-            <Card w="400px">
-              <CardHeader>
-                <Heading size="md">Cadastro</Heading>
-              </CardHeader>
+          <TabPanel
+            as="form"
+            w="400px"
+            my={5}
+            display="flex"
+            flexDir="column"
+            gap={7}
+            onSubmit={submit}
+          >
+            <FormInput
+              label="Nome"
+              value={formData.username || ""}
+              onChange={(e) =>
+                setFormData({ ...formData, username: e.target.value })
+              }
+            />
 
-              <CardBody>
-                <FormControl>
-                  <FormLabel>Nome</FormLabel>
-                  <Input
-                    type="text"
-                    value={formData.username || ""}
-                    onChange={(e) =>
-                      setFormData({ ...formData, username: e.target.value })
-                    }
-                  />
-                </FormControl>
+            <FormInput
+              type="password"
+              label="Senha"
+              value={formData.password || ""}
+              onChange={(e) =>
+                setFormData({ ...formData, password: e.target.value })
+              }
+            />
 
-                <FormControl>
-                  <FormLabel>Senha</FormLabel>
-                  <Input
-                    type="password"
-                    value={formData.password || ""}
-                    onChange={(e) =>
-                      setFormData({ ...formData, password: e.target.value })
-                    }
-                  />
-                </FormControl>
-              </CardBody>
-
-              <CardFooter>
-                <Button colorScheme="whatsapp" onClick={Cadastro}>
-                  Cadastrar
-                </Button>
-              </CardFooter>
-            </Card>
+            <Button mt={5} type="submit" colorScheme="whiteAlpha">
+              Cadastro
+            </Button>
           </TabPanel>
         </TabPanels>
       </Tabs>

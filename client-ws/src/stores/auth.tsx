@@ -7,13 +7,18 @@ type Payload = {
   username: string;
 };
 
+type AuthParams = {
+  username: string;
+  password: string;
+};
+
 type AuthStore = {
   socket: Socket | null;
   payload: Payload | null;
   isAuthenticated: boolean;
   authenticate: () => void;
-  signin: (username: string, password: string) => Promise<void>;
-  signup: (username: string, password: string) => Promise<void>;
+  signin: ({ username, password }: AuthParams) => Promise<void>;
+  signup: ({ username, password }: AuthParams) => Promise<void>;
   signout: () => void;
 };
 
@@ -34,7 +39,7 @@ export const useAuthStore = create<AuthStore>((set) => ({
       set({ socket, isAuthenticated: true, payload: JSON.parse(payload) });
     }
   },
-  signin: async (username, password) => {
+  signin: async ({ username, password }) => {
     const { data, status } = await api.post("/auth/signin", {
       username,
       password,
@@ -43,11 +48,13 @@ export const useAuthStore = create<AuthStore>((set) => ({
     if (status === 201) {
       localStorage.setItem("token", data.token);
       localStorage.setItem("payload", JSON.stringify(data.payload));
-      const socket = io(import.meta.env.VITE_BASE_URL);
+      const socket = io(import.meta.env.VITE_BASE_URL, {
+        extraHeaders: { Authorization: `Bearer ${data.token}` },
+      });
       set({ socket, isAuthenticated: true, payload: data.payload });
     }
   },
-  signup: async (username, password) => {
+  signup: async ({ username, password }) => {
     const { data, status } = await api.post("/auth/signup", {
       username,
       password,
@@ -56,7 +63,9 @@ export const useAuthStore = create<AuthStore>((set) => ({
     if (status === 201) {
       localStorage.setItem("token", data.token);
       localStorage.setItem("payload", JSON.stringify(data.payload));
-      const socket = io(import.meta.env.VITE_BASE_URL);
+      const socket = io(import.meta.env.VITE_BASE_URL, {
+        extraHeaders: { Authorization: `Bearer ${data.token}` },
+      });
       set({ socket, isAuthenticated: true, payload: data.payload });
     }
   },
