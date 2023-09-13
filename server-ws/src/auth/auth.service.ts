@@ -17,9 +17,13 @@ export class AuthService {
     private readonly prisma: PrismaService,
   ) {}
 
-  decodeToken(token: string) {
+  async decodeToken(token: string) {
     const userDecoded: SocketUser = this.jwtService.verify(token);
-    return userDecoded;
+    const user = await this.prisma.users.findUnique({
+      select: { usr_id: true, usr_ulid: true, usr_username: true },
+      where: { usr_ulid: userDecoded.ulid },
+    });
+    return user;
   }
 
   async signup(authDto: AuthDto) {

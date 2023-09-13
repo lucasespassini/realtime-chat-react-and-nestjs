@@ -2,6 +2,7 @@
 import {
   Avatar,
   Badge,
+  Box,
   Flex,
   Heading,
   Input,
@@ -15,23 +16,55 @@ import {
   useDisclosure,
 } from "@chakra-ui/react";
 import {
+  useRef,
   ForwardRefRenderFunction,
   forwardRef,
   useImperativeHandle,
+  useCallback,
+  useEffect,
 } from "react";
 import { RiSendPlane2Fill } from "react-icons/ri";
 import { ModalHandle } from "../../constants/Types";
 import { Colors } from "../../constants/Colors";
 import { useChatStore } from "../../stores/chat";
+import { useAuthStore } from "../../stores/auth";
 
 const ModalChat: ForwardRefRenderFunction<ModalHandle> = (_props, ref) => {
   const { isOpen, onOpen, onClose } = useDisclosure();
+  const { socket } = useAuthStore();
   const { user } = useChatStore();
+
+  const bottomRef = useRef<HTMLDivElement>(null);
+  const messageInputRef = useRef<HTMLInputElement>(null);
 
   useImperativeHandle(ref, () => ({
     onOpen,
     onClose,
   }));
+
+  const scrollToBottom = useCallback(
+    () => bottomRef.current.scrollIntoView({ behavior: "smooth" }),
+    []
+  );
+
+  const sendMessage = useCallback(() => {
+    const message = messageInputRef.current.value;
+
+    socket.emit("sendMessage", {
+      message,
+      user,
+    });
+
+    scrollToBottom();
+
+    return () => socket.off("sendMessage");
+  }, [scrollToBottom, socket, user]);
+
+  useEffect(() => {
+    socket.on("receivedMessage", (message) => {
+      console.log(message);
+    });
+  }, [socket]);
 
   return (
     <Modal isOpen={isOpen} onClose={onClose}>
@@ -87,10 +120,13 @@ const ModalChat: ForwardRefRenderFunction<ModalHandle> = (_props, ref) => {
             facilis nihil quaerat molestiae placeat repellendus. Illum esse
             accusantium maxime!
           </Flex>
+
+          <Box ref={bottomRef} />
         </ModalBody>
 
         <ModalFooter gap={4}>
           <Input
+            ref={messageInputRef}
             size="sm"
             bg={Colors.SECONDARY}
             borderRadius={999}
@@ -100,7 +136,13 @@ const ModalChat: ForwardRefRenderFunction<ModalHandle> = (_props, ref) => {
             _hover={{}}
           />
 
-          <Flex m={-1} p={1} borderRadius={999} cursor="pointer">
+          <Flex
+            m={-1}
+            p={1}
+            borderRadius={999}
+            cursor="pointer"
+            onClick={sendMessage}
+          >
             <RiSendPlane2Fill size={24} color={Colors.BORDER_COLOR} />
           </Flex>
         </ModalFooter>

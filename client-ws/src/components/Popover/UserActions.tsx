@@ -40,7 +40,7 @@ export const PopoverUserActions = ({ children }: PopoverUserActionsProps) => {
         borderRadius="10px"
         backgroundColor={Colors.SECONDARY}
         border={`1px solid ${Colors.BORDER_COLOR}`}
-        onClick={(e) => e.stopPropagation()}
+        // onClick={(e) => e.stopPropagation()}
       >
         <PopoverArrow border="0" bg={Colors.SECONDARY} />
 

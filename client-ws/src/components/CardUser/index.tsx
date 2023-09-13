@@ -3,12 +3,10 @@ import { PopoverUserActions } from "../Popover/UserActions";
 import { Colors } from "../../constants/Colors";
 import { SocketUser } from "../../constants/Types";
 import { useChatStore } from "../../stores/chat";
-import { useAuthStore } from "../../stores/auth";
 
 export const CardUser = (user: SocketUser) => {
   const { username, isOnline } = user;
 
-  const { socket } = useAuthStore();
   const { setUser } = useChatStore();
 
   return (

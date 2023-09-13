@@ -9,3 +9,12 @@ export type SocketUser = {
   username: string;
   isOnline?: boolean;
 };
+
+export type NewMessage = {
+  user: {
+    ulid: string;
+    username: string;
+  };
+  message: string;
+  conversationUlid: string;
+};

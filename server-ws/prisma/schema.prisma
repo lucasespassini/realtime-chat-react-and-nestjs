@@ -7,31 +7,40 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model messages {
-  msg_id      Int      @id @default(autoincrement())
-  msg_rom_id  Int
-  msg_ulid    String   @unique(map: "UK_messages_ulid") @db.VarChar(26)
-  msg_content String   @db.VarChar(255)
-  msg_read    Boolean? @default(false)
-  room        room     @relation(fields: [msg_rom_id], references: [rom_id], onDelete: NoAction, onUpdate: Restrict, map: "FK_messages_room")
+model conversation_participants {
+  cvp_id        Int           @id @default(autoincrement())
+  cvp_cvt_id    Int
+  cvp_usr_id    Int
+  conversations conversations @relation(fields: [cvp_cvt_id], references: [cvt_id], onDelete: NoAction, onUpdate: NoAction, map: "FK_conversation_participants_conversations")
+  users         users         @relation(fields: [cvp_usr_id], references: [usr_id], onDelete: NoAction, onUpdate: NoAction, map: "FK_conversation_participants_users")
 
-  @@index([msg_rom_id], map: "FK_messages_room")
+  @@index([cvp_cvt_id], map: "FK_conversation_participants_conversations")
+  @@index([cvp_usr_id], map: "FK_conversation_participants_users")
 }
 
-model room {
-  rom_id     Int        @id @default(autoincrement())
-  rom_usr_id Int
-  rom_ulid   String     @unique(map: "UK_room_ulid") @db.VarChar(26)
-  messages   messages[]
-  users      users      @relation(fields: [rom_usr_id], references: [usr_id], onDelete: NoAction, onUpdate: Restrict, map: "FK_room_users")
+model conversations {
+  cvt_id                    Int                         @id @default(autoincrement())
+  cvt_ulid                  String                      @unique(map: "UK_conversations_ulid") @db.VarChar(26)
+  cvt_name                  String?                     @db.VarChar(100)
+  conversation_participants conversation_participants[]
+}
 
-  @@index([rom_usr_id], map: "FK_room_users")
+model messages {
+  msg_id        Int       @id @default(autoincrement())
+  msg_usr_id    Int
+  msg_content   String    @db.VarChar(255)
+  msg_read      Boolean?  @default(false)
+  msg_date_send DateTime? @default(now()) @db.Timestamp(0)
+  users         users     @relation(fields: [msg_usr_id], references: [usr_id], onDelete: NoAction, onUpdate: NoAction, map: "FK_messages_users")
+
+  @@index([msg_usr_id], map: "FK_messages_users")
 }
 
 model users {
-  usr_id       Int    @id @default(autoincrement())
-  usr_ulid     String @unique(map: "UK_users_ulid") @db.VarChar(26)
-  usr_username String @unique(map: "UK_users_username") @db.VarChar(255)
-  usr_password String @db.VarChar(255)
-  room         room[]
+  usr_id                    Int                         @id @default(autoincrement())
+  usr_ulid                  String                      @unique(map: "UK_users_ulid") @db.VarChar(26)
+  usr_username              String                      @unique(map: "UK_users_username") @db.VarChar(255)
+  usr_password              String                      @db.VarChar(255)
+  conversation_participants conversation_participants[]
+  messages                  messages[]
 }
