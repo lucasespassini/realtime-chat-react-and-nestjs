@@ -6,7 +6,7 @@ import { Header } from "../components/Header";
 import { SocketUser } from "../constants/Types";
 import { useAuthStore } from "../stores/auth";
 import { useUserStore } from "../stores/user";
-import { api } from "../providers/api";
+import { api } from "../services/api";
 
 interface PrivateRouteProps {
   children: JSX.Element;

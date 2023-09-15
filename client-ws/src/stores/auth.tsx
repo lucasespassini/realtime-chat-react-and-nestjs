@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import { api } from "../providers/api";
+import { api } from "../services/api";
 import { Socket, io } from "socket.io-client";
 
 type Payload = {
