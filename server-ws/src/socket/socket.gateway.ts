@@ -25,9 +25,12 @@ export class SocketGateway implements OnGatewayConnection, OnGatewayDisconnect {
   users: SocketUser[] = [];
 
   handleDisconnect(@ConnectedSocket() client: Socket) {
-    this.users = this.users.filter((user) => user.socketId !== client.id);
-    this.server.emit('showUsers', this.users);
+    const userDisconnected = this.users.find(
+      (user) => client.id === user.socketId,
+    );
 
+    this.users = this.users.filter((user) => user.socketId !== client.id);
+    this.server.emit('userDisconnected', userDisconnected);
     this.logger.log(`Client Disconnected: ${client.id}`);
   }
 
@@ -38,21 +41,14 @@ export class SocketGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
     const user = await this.authService.decodeToken(token);
 
-    this.users.push({
+    const userConnected = {
       socketId: client.id,
       ulid: user.usr_ulid,
       username: user.usr_username,
-    });
-    const conversations = await this.prisma.conversation_participants.findMany({
-      select: { conversations: { select: { cvt_ulid: true } } },
-      where: { cvp_usr_id: user.usr_id },
-    });
-    console.log(conversations);
-    for (const conversation of conversations)
-      client.join(conversation.conversations.cvt_ulid);
+    };
 
-    this.server.emit('showUsers', this.users);
-
+    this.users.push(userConnected);
+    this.server.emit('userConnected', userConnected);
     this.logger.log(`Client Connected: ${client.id}`);
   }
 }

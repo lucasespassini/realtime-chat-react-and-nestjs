@@ -1,21 +1,15 @@
 import { Container, Flex, Heading, Text } from "@chakra-ui/react";
 import { useAuthStore } from "../stores/auth";
 import { useUserStore } from "../stores/user";
-import { CardUser } from "../components/CardUser";
 import { useChatStore } from "../stores/chat";
-import { useEffect } from "react";
+import { CardUser } from "../components/CardUser";
 
 export const HomePage = () => {
   const { socket } = useAuthStore();
   const { users } = useUserStore();
-  const { historyChat, setHistoryChat } = useChatStore();
+  const { historyChat } = useChatStore();
 
-  useEffect(() => {
-    socket.on("newMessage", (message) => {
-      setHistoryChat(message);
-      console.log(message);
-    });
-  }, [setHistoryChat, socket]);
+  console.log(users);
 
   return (
     <Flex mt={5}>

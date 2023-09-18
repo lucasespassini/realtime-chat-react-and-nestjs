@@ -1,6 +1,6 @@
 import { create } from "zustand";
-import { api } from "../services/api";
 import { Socket, io } from "socket.io-client";
+import { api } from "../services/api";
 
 type Payload = {
   ulid: string;
