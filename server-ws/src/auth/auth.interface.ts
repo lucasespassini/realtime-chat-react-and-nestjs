@@ -4,7 +4,8 @@ export interface Payload {
 }
 
 export interface SocketUser {
-  socketId: string;
+  socketId?: string;
   ulid: string;
   username: string;
+  isOnline: boolean;
 }

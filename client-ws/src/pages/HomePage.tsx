@@ -1,12 +1,10 @@
 import { Container, Flex, Heading, Text } from "@chakra-ui/react";
-import { useAuthStore } from "../stores/auth";
-import { useUserStore } from "../stores/user";
 import { useChatStore } from "../stores/chat";
+import { useUsersQuery } from "../query/useUsersQuery";
 import { CardUser } from "../components/CardUser";
 
 export const HomePage = () => {
-  const { socket } = useAuthStore();
-  const { users } = useUserStore();
+  const { data: { users } = {} } = useUsersQuery();
   const { historyChat } = useChatStore();
 
   console.log(users);
@@ -19,12 +17,9 @@ export const HomePage = () => {
         </Heading>
 
         <Flex alignItems="center" flexWrap="wrap" gap={3}>
-          {users.map(
-            (user) =>
-              user.socketId !== socket.id && (
-                <CardUser key={user.ulid} {...user} />
-              )
-          )}
+          {users?.map((user) => (
+            <CardUser key={user.ulid} {...user} />
+          ))}
         </Flex>
       </Container>
 

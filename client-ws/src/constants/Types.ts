@@ -7,7 +7,7 @@ export type SocketUser = {
   socketId?: string;
   ulid: string;
   username: string;
-  isOnline?: boolean;
+  isOnline: boolean;
 };
 
 export type NewMessage = {

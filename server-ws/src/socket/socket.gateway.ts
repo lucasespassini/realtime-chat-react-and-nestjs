@@ -9,14 +9,10 @@ import { Logger } from '@nestjs/common';
 import { Server, Socket } from 'socket.io';
 import { AuthService } from 'src/auth/auth.service';
 import { SocketUser } from 'src/auth/auth.interface';
-import { PrismaService } from 'src/prisma/prisma.service';
 
 @WebSocketGateway()
 export class SocketGateway implements OnGatewayConnection, OnGatewayDisconnect {
-  constructor(
-    private readonly authService: AuthService,
-    private readonly prisma: PrismaService,
-  ) {}
+  constructor(private readonly authService: AuthService) {}
   private logger: Logger = new Logger('SocketGateway');
 
   @WebSocketServer()
@@ -30,25 +26,33 @@ export class SocketGateway implements OnGatewayConnection, OnGatewayDisconnect {
     );
 
     this.users = this.users.filter((user) => user.socketId !== client.id);
-    this.server.emit('userDisconnected', userDisconnected);
+    client.broadcast.emit('userDisconnected', userDisconnected);
     this.logger.log(`Client Disconnected: ${client.id}`);
   }
 
   async handleConnection(@ConnectedSocket() client: Socket) {
-    const token = client.handshake.headers.authorization?.split(' ')[1];
+    const user = await this.authenticateClient(client);
 
-    if (!token) return;
+    if (!user) {
+      client.disconnect();
+      return;
+    }
 
-    const user = await this.authService.decodeToken(token);
-
-    const userConnected = {
+    const userConnected: SocketUser = {
       socketId: client.id,
       ulid: user.usr_ulid,
       username: user.usr_username,
+      isOnline: true,
     };
 
     this.users.push(userConnected);
-    this.server.emit('userConnected', userConnected);
+    client.broadcast.emit('userConnected', userConnected);
     this.logger.log(`Client Connected: ${client.id}`);
+  }
+
+  private authenticateClient(client: Socket) {
+    const token = client.handshake.headers.authorization?.split(' ')[1];
+
+    return !token ? false : this.authService.decodeToken(token);
   }
 }

@@ -1,17 +1,16 @@
 import { useToast } from "@chakra-ui/react";
 import { useEffect } from "react";
 import { useAuthStore } from "../../stores/auth";
-import { useUserStore } from "../../stores/user";
 import { SocketUser } from "../../constants/Types";
 
 export const UserProvider = ({ children }: { children: JSX.Element }) => {
   const toast = useToast();
   const { socket } = useAuthStore();
-  const { addUserConnected, removeUserDisconnect } = useUserStore();
 
   useEffect(() => {
     socket?.on("userConnected", async (user: SocketUser) => {
-      addUserConnected(user);
+      // queryClient.invalidateQueries("users");
+      console.log("teste");
       toast({
         description: `${user.username} está online!`,
         isClosable: false,
@@ -19,11 +18,11 @@ export const UserProvider = ({ children }: { children: JSX.Element }) => {
         duration: 3000,
       });
     });
-  }, [addUserConnected, socket, toast]);
+  }, [socket, toast]);
 
   useEffect(() => {
     socket?.on("userDisconnected", async (user: SocketUser) => {
-      removeUserDisconnect(user);
+      // queryClient.invalidateQueries("users");
       toast({
         description: `${user.username} agora está offline!`,
         isClosable: false,
@@ -31,7 +30,7 @@ export const UserProvider = ({ children }: { children: JSX.Element }) => {
         duration: 3000,
       });
     });
-  }, [removeUserDisconnect, socket, toast]);
+  }, [socket, toast]);
 
   return children;
 };

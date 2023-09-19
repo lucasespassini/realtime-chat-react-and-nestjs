@@ -10,7 +10,7 @@ api.interceptors.response.use(
     if (error.response.status === 401) {
       localStorage.removeItem("token");
       localStorage.removeItem("payload");
-      api.defaults.headers['Authorization'] = null;
+      api.defaults.headers["Authorization"] = null;
       window.location.replace("/auth");
     }
     return Promise.reject(error);
