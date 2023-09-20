@@ -1,7 +1,6 @@
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import { AuthPage } from "../pages/AuthPage";
 import { HomePage } from "../pages/HomePage";
-import { Header } from "../components/Header";
 import { useAuthStore } from "../stores/auth";
 
 interface PrivateRouteProps {
@@ -12,14 +11,7 @@ export const AppRoutes = () => {
   const { isAuthenticated } = useAuthStore();
 
   const PrivateRoute = ({ children }: PrivateRouteProps) =>
-    isAuthenticated ? (
-      <>
-        <Header />
-        {children}
-      </>
-    ) : (
-      <Navigate to="/auth" />
-    );
+    isAuthenticated ? children : <Navigate to="/auth" />;
 
   const PublicRoute = ({ children }: PrivateRouteProps) =>
     isAuthenticated ? <Navigate to="/" /> : children;

@@ -18,3 +18,13 @@ export type NewMessage = {
   message: string;
   conversationUlid: string;
 };
+
+export type UserConnect = {
+  userConnected: SocketUser;
+  users: SocketUser[];
+};
+
+export type UserDisconnect = {
+  userDisconnected: SocketUser;
+  users: SocketUser[];
+};

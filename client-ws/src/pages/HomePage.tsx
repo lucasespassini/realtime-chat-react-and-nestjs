@@ -1,34 +1,78 @@
-import { Container, Flex, Heading, Text } from "@chakra-ui/react";
-import { useChatStore } from "../stores/chat";
-import { useUsersQuery } from "../query/useUsersQuery";
-import { CardUser } from "../components/CardUser";
+import { Avatar, Flex, Heading } from "@chakra-ui/react";
+import { Colors } from "../constants/Colors";
+import { useUserStore } from "../stores/user";
+import { useAuthStore } from "../stores/auth";
+import { CardUser } from "../components/Card/CardUser";
+import { CardUserChat } from "../components/Card/CardUserChat";
 
 export const HomePage = () => {
-  const { data: { users } = {} } = useUsersQuery();
-  const { historyChat } = useChatStore();
-
-  console.log(users);
+  const { users } = useUserStore();
+  const { payload } = useAuthStore();
 
   return (
-    <Flex mt={5}>
-      <Container maxW="70vw" display="flex" flexDir="column" gap={5}>
-        <Heading size="md" textAlign="center">
-          Usuários
-        </Heading>
+    <Flex gap={5}>
+      <Flex
+        w="300px"
+        h="100vh"
+        flexDir="column"
+        borderRight={`1px solid ${Colors.BORDER_COLOR}`}
+      >
+        <Flex
+          p="10px"
+          alignItems="center"
+          flexDir="column"
+          gap={3}
+          bgColor={Colors.SECONDARY}
+          borderBottom={`1px solid ${Colors.BORDER_COLOR}`}
+        >
+          <Avatar />
 
-        <Flex alignItems="center" flexWrap="wrap" gap={3}>
-          {users?.map((user) => (
-            <CardUser key={user.ulid} {...user} />
-          ))}
+          <Heading size="md">{payload.username}</Heading>
+
+          {/* 
+            perfil: 
+            notificação: 
+            sair: 
+          */}
         </Flex>
-      </Container>
 
-      <Container maxW="20vw" display="flex" flexDir="column">
-        <Heading size="md">Histórico de conversas</Heading>
-        {historyChat.map((chat) => (
-          <Text key={chat.conversationUlid}>{chat.message}</Text>
-        ))}
-      </Container>
+        <Flex
+          flexDir="column"
+          overflow="auto"
+          css={{
+            "&::-webkit-scrollbar": {
+              width: "4px",
+            },
+            "&::-webkit-scrollbar-track": {
+              width: "6px",
+            },
+            "&::-webkit-scrollbar-thumb": {
+              background: Colors.SECONDARY,
+            },
+          }}
+        >
+          <CardUserChat username="teste" ulid="dsadas" isOnline={true} />
+          <CardUserChat username="teste" ulid="dsadas" isOnline={true} />
+          <CardUserChat username="teste" ulid="dsadas" isOnline={true} />
+          <CardUserChat username="teste" ulid="dsadas" isOnline={true} />
+          <CardUserChat username="teste" ulid="dsadas" isOnline={true} />
+          <CardUserChat username="teste" ulid="dsadas" isOnline={true} />
+          <CardUserChat username="teste" ulid="dsadas" isOnline={true} />
+          <CardUserChat username="teste" ulid="dsadas" isOnline={true} />
+          <CardUserChat username="teste" ulid="dsadas" isOnline={true} />
+          <CardUserChat username="teste" ulid="dsadas" isOnline={true} />
+          <CardUserChat username="teste" ulid="dsadas" isOnline={true} />
+          <CardUserChat username="teste" ulid="dsadas" isOnline={true} />
+          <CardUserChat username="teste" ulid="dsadas" isOnline={true} />
+        </Flex>
+      </Flex>
+
+      <Flex alignItems="center" flexWrap="wrap" gap={3}>
+        {users?.map(
+          (user) =>
+            user.ulid !== payload.ulid && <CardUser key={user.ulid} {...user} />
+        )}
+      </Flex>
     </Flex>
   );
 };

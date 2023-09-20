@@ -4,7 +4,7 @@ import { AuthModule } from 'src/auth/auth.module';
 
 @Global()
 @Module({
-  imports: [AuthModule, AuthModule],
+  imports: [AuthModule],
   providers: [SocketGateway],
   exports: [SocketGateway],
 })
