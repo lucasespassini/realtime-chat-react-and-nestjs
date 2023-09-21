@@ -12,22 +12,23 @@ export const CardUser = (user: SocketUser) => {
   return (
     <PopoverUserActions>
       <Flex
-        px={4}
-        py={3}
-        w="15rem"
-        display="flex"
+        px={6}
+        py={5}
+        w="280px"
         alignItems="center"
         justifyContent="flex-start"
-        gap={4}
+        gap={6}
         cursor="pointer"
         bg={Colors.SECONDARY}
-        border={`1px solid ${Colors.BORDER_COLOR}`}
-        borderRadius="10px"
+        borderRight={`1px solid ${Colors.BORDER_COLOR}`}
+        borderBottom={`1px solid ${Colors.BORDER_COLOR}`}
+        transition=".2s"
+        _hover={{ backgroundColor: Colors.BORDER_COLOR }}
         onClick={() => setUser(user)}
       >
         <Avatar />
 
-        <Flex w="100%" flexDir="column" alignItems="flex-start" gap={1}>
+        <Flex w="100%" flexDir="column" alignItems="flex-start" gap={2}>
           <Heading size="md">
             {username.substring(0, 11)}
             {username.length > 11 && "..."}

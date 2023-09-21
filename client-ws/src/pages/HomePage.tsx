@@ -1,24 +1,36 @@
 import { Avatar, Flex, Heading } from "@chakra-ui/react";
+import { useState } from "react";
 import { Colors } from "../constants/Colors";
 import { useUserStore } from "../stores/user";
 import { useAuthStore } from "../stores/auth";
 import { CardUser } from "../components/Card/CardUser";
 import { CardUserChat } from "../components/Card/CardUserChat";
+import { MessageInput } from "../components/Form/MessageInput";
 
 export const HomePage = () => {
   const { users } = useUserStore();
   const { payload } = useAuthStore();
 
+  const [search, setSearch] = useState("");
+
+  const filteredUsers =
+    search.length > 0
+      ? users.filter(
+          (user) =>
+            user.username.toUpperCase().indexOf(search.toUpperCase()) > -1
+        )
+      : [];
+
   return (
-    <Flex gap={5}>
+    <Flex>
       <Flex
-        w="300px"
+        minW="350px"
         h="100vh"
         flexDir="column"
         borderRight={`1px solid ${Colors.BORDER_COLOR}`}
       >
         <Flex
-          p="10px"
+          p="15px"
           alignItems="center"
           flexDir="column"
           gap={3}
@@ -28,12 +40,6 @@ export const HomePage = () => {
           <Avatar />
 
           <Heading size="md">{payload.username}</Heading>
-
-          {/* 
-            perfil: 
-            notificação: 
-            sair: 
-          */}
         </Flex>
 
         <Flex
@@ -58,20 +64,38 @@ export const HomePage = () => {
           <CardUserChat username="teste" ulid="dsadas" isOnline={true} />
           <CardUserChat username="teste" ulid="dsadas" isOnline={true} />
           <CardUserChat username="teste" ulid="dsadas" isOnline={true} />
-          <CardUserChat username="teste" ulid="dsadas" isOnline={true} />
-          <CardUserChat username="teste" ulid="dsadas" isOnline={true} />
-          <CardUserChat username="teste" ulid="dsadas" isOnline={true} />
-          <CardUserChat username="teste" ulid="dsadas" isOnline={true} />
-          <CardUserChat username="teste" ulid="dsadas" isOnline={true} />
-          <CardUserChat username="teste" ulid="dsadas" isOnline={true} />
         </Flex>
       </Flex>
 
-      <Flex alignItems="center" flexWrap="wrap" gap={3}>
-        {users?.map(
-          (user) =>
-            user.ulid !== payload.ulid && <CardUser key={user.ulid} {...user} />
-        )}
+      <Flex width="100%" flexDir="column">
+        <Flex mx="30%" my={3}>
+          <MessageInput
+            placeholder="Pesquisar usuário"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+          />
+        </Flex>
+
+        <Flex
+          alignContent="flex-start"
+          justifyContent="center"
+          flexWrap="wrap"
+          overflow="auto"
+        >
+          {filteredUsers.length > 0 || search.length > 0
+            ? filteredUsers?.map(
+                (user) =>
+                  user.ulid !== payload.ulid && (
+                    <CardUser key={user.ulid} {...user} />
+                  )
+              )
+            : users?.map(
+                (user) =>
+                  user.ulid !== payload.ulid && (
+                    <CardUser key={user.ulid} {...user} />
+                  )
+              )}
+        </Flex>
       </Flex>
     </Flex>
   );
