@@ -28,3 +28,8 @@ export type UserDisconnect = {
   userDisconnected: SocketUser;
   users: SocketUser[];
 };
+
+export type ErrorMessage = {
+  error?: { status?: number };
+  message: string;
+};

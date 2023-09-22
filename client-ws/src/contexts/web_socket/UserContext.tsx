@@ -28,7 +28,7 @@ export const UserProvider = ({ children }: { children: JSX.Element }) => {
       setUsers(data.users);
 
       toast({
-        description: `${data.userDisconnected.username} agora está offline!`,
+        description: `${data?.userDisconnected?.username} agora está offline!`,
         isClosable: false,
         status: "info",
         duration: 3000,

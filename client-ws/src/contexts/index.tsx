@@ -6,12 +6,12 @@ import { queryClient } from "../services/queryClient";
 
 export const AppProviders = ({ children }: { children: JSX.Element }) => {
   return (
-    <ChakraProvider>
-      <AuthProvider>
-        <QueryClientProvider client={queryClient}>
+    <QueryClientProvider client={queryClient}>
+      <ChakraProvider>
+        <AuthProvider>
           <UserProvider>{children}</UserProvider>
-        </QueryClientProvider>
-      </AuthProvider>
-    </ChakraProvider>
+        </AuthProvider>
+      </ChakraProvider>
+    </QueryClientProvider>
   );
 };

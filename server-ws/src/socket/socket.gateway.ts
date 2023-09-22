@@ -4,12 +4,14 @@ import {
   OnGatewayDisconnect,
   WebSocketGateway,
   WebSocketServer,
+  WsException,
 } from '@nestjs/websockets';
-import { Logger } from '@nestjs/common';
+import { Logger, UseInterceptors } from '@nestjs/common';
 import { Server, Socket } from 'socket.io';
 import { AuthService } from 'src/auth/auth.service';
 import { SocketUser } from 'src/auth/auth.interface';
 import { PrismaService } from 'src/prisma/prisma.service';
+import { AuthInterceptor } from 'src/auth/auth.interceptor';
 
 @WebSocketGateway()
 export class SocketGateway implements OnGatewayConnection, OnGatewayDisconnect {
@@ -43,9 +45,14 @@ export class SocketGateway implements OnGatewayConnection, OnGatewayDisconnect {
     const user = await this.authenticateClient(client);
 
     if (!user) {
-      client.disconnect();
+      // client.disconnect();
       return;
     }
+
+    // if (user instanceof WsException) {
+    //   client.disconnect();
+    //   return;
+    // }
 
     const userConnected: SocketUser = {
       socketId: client.id,

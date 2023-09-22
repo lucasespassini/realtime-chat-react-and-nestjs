@@ -9,6 +9,8 @@ import { ulid } from 'ulid';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { AuthDto } from './dto/auth.dto';
 import { Payload, SocketUser } from './auth.interface';
+import { TokenExpiredError } from 'jsonwebtoken';
+import { WsException } from '@nestjs/websockets';
 
 @Injectable()
 export class AuthService {
@@ -24,6 +26,14 @@ export class AuthService {
       where: { usr_ulid: userDecoded.ulid },
     });
     return user;
+    // try {
+
+    // } catch (error) {
+    //   if (error instanceof TokenExpiredError)
+    //     return new WsException('Sessão expirada!');
+
+    //   return new WsException('Erro de autenticação.');
+    // }
   }
 
   async signup(authDto: AuthDto) {

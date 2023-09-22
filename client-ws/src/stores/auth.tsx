@@ -1,3 +1,4 @@
+import Cookies from "js-cookie";
 import { create } from "zustand";
 import { Socket, io } from "socket.io-client";
 import { api } from "../services/api";
@@ -27,16 +28,20 @@ export const useAuthStore = create<AuthStore>((set) => ({
   payload: null,
   isAuthenticated: false,
   authenticate: () => {
-    const token = localStorage.getItem("token");
-    const payload = localStorage.getItem("payload");
+    const token = Cookies.get("token");
+    const payload = Cookies.get("payload");
 
     if (token && payload) {
-      const socket = io(import.meta.env.VITE_BASE_URL, {
-        extraHeaders: { Authorization: `Bearer ${token}` },
-      });
+      const socket = io(import.meta.env.VITE_BASE_URL, { auth: { token } });
       api.defaults.headers["Authorization"] = `Bearer ${token}`;
       set({ socket, isAuthenticated: true, payload: JSON.parse(payload) });
     }
+    set((state) => {
+      console.log(state.socket.volatile.connected);
+      return {
+        ...state,
+      };
+    });
   },
   signin: async ({ username, password }) => {
     const { data, status } = await api.post("/auth/signin", {
@@ -45,10 +50,14 @@ export const useAuthStore = create<AuthStore>((set) => ({
     });
 
     if (status === 201) {
-      localStorage.setItem("token", data.token);
-      localStorage.setItem("payload", JSON.stringify(data.payload));
+      const expirationTimeInDays = 12 / 24;
+      Cookies.set("token", data.token, { expires: expirationTimeInDays });
+      Cookies.set("payload", JSON.stringify(data.payload), {
+        expires: expirationTimeInDays,
+      });
+
       const socket = io(import.meta.env.VITE_BASE_URL, {
-        extraHeaders: { Authorization: `Bearer ${data.token}` },
+        auth: { token: data.token },
       });
       api.defaults.headers["Authorization"] = `Bearer ${data.token}`;
       set({ socket, isAuthenticated: true, payload: data.payload });
@@ -61,20 +70,24 @@ export const useAuthStore = create<AuthStore>((set) => ({
     });
 
     if (status === 201) {
-      localStorage.setItem("token", data.token);
-      localStorage.setItem("payload", JSON.stringify(data.payload));
+      const expirationTimeInDays = 12 / 24;
+      Cookies.set("token", data.token, { expires: expirationTimeInDays });
+      Cookies.set("payload", JSON.stringify(data.payload), {
+        expires: expirationTimeInDays,
+      });
       const socket = io(import.meta.env.VITE_BASE_URL, {
-        extraHeaders: { Authorization: `Bearer ${data.token}` },
+        auth: { token: data.token },
       });
       api.defaults.headers["Authorization"] = `Bearer ${data.token}`;
       set({ socket, isAuthenticated: true, payload: data.payload });
     }
   },
   signout: () => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("payload");
+    Cookies.remove("token");
+    Cookies.remove("payload");
     set((state) => {
       state.socket?.disconnect();
+      api.defaults.headers["Authorization"] = null;
       return {
         isAuthenticated: false,
         payload: null,

@@ -15,44 +15,39 @@ export class MessageService {
   ) {}
 
   async sendMessage(client: Socket, messageDto: MessageDto) {
-    const token = client.handshake.headers.authorization?.split(' ')[1];
-    if (!token) return;
-    const user = await this.authService.decodeToken(token);
-
-    const userSocket = await this.prisma.users.findUnique({
-      where: { usr_ulid: messageDto.user.ulid },
-    });
-
-    const conversation = await this.prisma.conversations.create({
-      data: {
-        cvt_ulid: ulid(),
-        conversation_participants: {
-          createMany: {
-            data: [
-              { cvp_usr_id: user.usr_id },
-              { cvp_usr_id: userSocket.usr_id },
-            ],
-          },
-        },
-      },
-    });
-
+    // const token = client.handshake.headers.authorization?.split(' ')[1];
+    // if (!token) return;
+    // const user = await this.authService.decodeToken(token);
+    // const userSocket = await this.prisma.users.findUnique({
+    //   where: { usr_ulid: messageDto.user.ulid },
+    // });
+    // const conversation = await this.prisma.conversations.create({
+    //   data: {
+    //     cvt_ulid: ulid(),
+    //     conversation_participants: {
+    //       createMany: {
+    //         data: [
+    //           { cvp_usr_id: user.usr_id },
+    //           { cvp_usr_id: userSocket.usr_id },
+    //         ],
+    //       },
+    //     },
+    //   },
+    // });
     // await this.prisma.messages.create({
     //   data: {
     //     msg_content: messageDto.message,
     //     users: { connect: { usr_ulid: user.usr_ulid } },
     //   },
     // });
-
-    client.join(conversation.cvt_ulid);
-
-    this.socketGateway.server.to(messageDto.user.socketId).emit('newMessage', {
-      user: {
-        ulid: user.usr_ulid,
-        username: user.usr_username,
-      },
-      message: messageDto.message,
-      conversationUlid: conversation.cvt_ulid,
-    });
+    // client.join(conversation.cvt_ulid);
+    // this.socketGateway.server.to(messageDto.user.socketId).emit('newMessage', {
+    //   user: {
+    //     ulid: user.usr_ulid,
+    //     username: user.usr_username,
+    //   },
+    //   message: messageDto.message,
+    //   conversationUlid: conversation.cvt_ulid,
+    // });
   }
 }

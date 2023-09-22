@@ -1,4 +1,5 @@
 import axios from "axios";
+import Cookies from "js-cookie";
 
 const api = axios.create({ baseURL: import.meta.env.VITE_BASE_URL });
 
@@ -8,8 +9,8 @@ api.interceptors.response.use(
   },
   (error) => {
     if (error.response.status === 401) {
-      localStorage.removeItem("token");
-      localStorage.removeItem("payload");
+      Cookies.remove("token");
+      Cookies.remove("payload");
       api.defaults.headers["Authorization"] = null;
       window.location.replace("/auth");
     }
