@@ -12,6 +12,7 @@ export const UserProvider = ({ children }: { children: JSX.Element }) => {
   useEffect(() => {
     socket?.on("userConnected", (data: UserConnect) => {
       setUsers(data.users);
+      console.log(data);
 
       data.userConnected.socketId !== socket.id &&
         toast({
@@ -26,6 +27,7 @@ export const UserProvider = ({ children }: { children: JSX.Element }) => {
   useEffect(() => {
     socket?.on("userDisconnected", (data: UserDisconnect) => {
       setUsers(data.users);
+      console.log(data);
 
       toast({
         description: `${data?.userDisconnected?.username} agora está offline!`,

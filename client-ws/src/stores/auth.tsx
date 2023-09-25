@@ -36,12 +36,6 @@ export const useAuthStore = create<AuthStore>((set) => ({
       api.defaults.headers["Authorization"] = `Bearer ${token}`;
       set({ socket, isAuthenticated: true, payload: JSON.parse(payload) });
     }
-    set((state) => {
-      console.log(state.socket.volatile.connected);
-      return {
-        ...state,
-      };
-    });
   },
   signin: async ({ username, password }) => {
     const { data, status } = await api.post("/auth/signin", {
