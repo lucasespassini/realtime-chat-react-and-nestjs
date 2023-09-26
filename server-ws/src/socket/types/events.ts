@@ -9,4 +9,5 @@ type ConnectionParams = {
 export interface ServerToClientEvents {
   userDisconnected: (connectionParams: ConnectionParams) => void;
   userConnected: (connectionParams: ConnectionParams) => void;
+  receivedMessage: () => void;
 }

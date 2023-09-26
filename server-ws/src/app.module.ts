@@ -3,7 +3,7 @@ import { SocketModule } from './socket/socket.module';
 import { AuthModule } from './auth/auth.module';
 import { PrismaModule } from './prisma/prisma.module';
 import { ConfigModule } from '@nestjs/config';
-import { MessagesModule } from './messages/messages.module';
+import { ChatModule } from './chat/chat.module';
 
 @Module({
   imports: [
@@ -11,7 +11,7 @@ import { MessagesModule } from './messages/messages.module';
     SocketModule,
     AuthModule,
     PrismaModule,
-    MessagesModule,
+    ChatModule,
   ],
 })
 export class AppModule {}

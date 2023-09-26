@@ -14,6 +14,7 @@ import { SocketUser } from 'src/auth/types/auth';
 import { SocketAuthMiddleware } from 'src/auth/jwt/ws.middleware';
 import { ServerToClientEvents } from './types/events';
 import { WsJwtGuard } from 'src/auth/jwt/ws-jwt.guard';
+import { ChatService } from 'src/chat/chat.service';
 
 @WebSocketGateway({ cors: true })
 @UseGuards(WsJwtGuard)
@@ -24,6 +25,7 @@ export class SocketGateway
   constructor(
     private readonly prisma: PrismaService,
     private readonly authService: AuthService,
+    private readonly chatService: ChatService,
   ) {}
 
   private logger: Logger = new Logger('SocketGateway');
@@ -70,6 +72,8 @@ export class SocketGateway
     this.users.push(userConnected);
     const filteredUsers = await this.filterUsers();
 
+    this.chatService.joinRoom(client, user.ulid);
+
     this.server.emit('userConnected', {
       userConnected,
       users: filteredUsers,
@@ -90,7 +94,7 @@ export class SocketGateway
       );
 
       matchUser
-        ? filteredUsers.push(matchUser)
+        ? filteredUsers.unshift(matchUser)
         : filteredUsers.push({
             socketId: null,
             ulid: user.usr_ulid,
@@ -98,12 +102,6 @@ export class SocketGateway
             isOnline: false,
           });
     }
-
-    filteredUsers.sort((a, b) => {
-      if (a.isOnline > b.isOnline) return -1;
-      if (a.isOnline < b.isOnline) return 1;
-      return 0;
-    });
 
     return filteredUsers;
   }
