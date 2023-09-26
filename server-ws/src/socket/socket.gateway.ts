@@ -2,31 +2,43 @@ import {
   ConnectedSocket,
   OnGatewayConnection,
   OnGatewayDisconnect,
+  OnGatewayInit,
   WebSocketGateway,
   WebSocketServer,
-  WsException,
 } from '@nestjs/websockets';
-import { Logger, UseInterceptors } from '@nestjs/common';
+import { Injectable, Logger, UseGuards } from '@nestjs/common';
 import { Server, Socket } from 'socket.io';
 import { AuthService } from 'src/auth/auth.service';
-import { SocketUser } from 'src/auth/auth.interface';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { AuthInterceptor } from 'src/auth/auth.interceptor';
+import { SocketUser } from 'src/auth/types/auth';
+import { SocketAuthMiddleware } from 'src/auth/jwt/ws.middleware';
+import { ServerToClientEvents } from './types/events';
+import { WsJwtGuard } from 'src/auth/jwt/ws-jwt.guard';
 
-@WebSocketGateway()
-export class SocketGateway implements OnGatewayConnection, OnGatewayDisconnect {
+@WebSocketGateway({ cors: true })
+@UseGuards(WsJwtGuard)
+@Injectable()
+export class SocketGateway
+  implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect
+{
   constructor(
     private readonly prisma: PrismaService,
     private readonly authService: AuthService,
   ) {}
+
   private logger: Logger = new Logger('SocketGateway');
-
-  @WebSocketServer()
-  server: Server;
-
   users: SocketUser[] = [];
 
-  async handleDisconnect(@ConnectedSocket() client: Socket) {
+  @WebSocketServer()
+  server: Server<any, ServerToClientEvents>;
+
+  afterInit(@ConnectedSocket() client: Socket) {
+    client.use(SocketAuthMiddleware(this.authService) as any);
+  }
+
+  async handleDisconnect(
+    @ConnectedSocket() client: Socket<any, ServerToClientEvents>,
+  ) {
     const userDisconnected = this.users.find(
       (user) => client.id === user.socketId,
     );
@@ -38,26 +50,20 @@ export class SocketGateway implements OnGatewayConnection, OnGatewayDisconnect {
       userDisconnected,
       users: filteredUsers,
     });
+
     this.logger.log(`Client Disconnected: ${client.id}`);
   }
 
-  async handleConnection(@ConnectedSocket() client: Socket) {
-    const user = await this.authenticateClient(client);
-
-    if (!user) {
-      // client.disconnect();
-      return;
-    }
-
-    // if (user instanceof WsException) {
-    //   client.disconnect();
-    //   return;
-    // }
+  async handleConnection(
+    @ConnectedSocket() client: Socket<any, ServerToClientEvents>,
+  ) {
+    const { authorization } = client.handshake.headers;
+    const user = this.authService.isValidAuthHeader(authorization);
 
     const userConnected: SocketUser = {
       socketId: client.id,
-      ulid: user.usr_ulid,
-      username: user.usr_username,
+      ulid: user.ulid,
+      username: user.username,
       isOnline: true,
     };
 
@@ -68,12 +74,8 @@ export class SocketGateway implements OnGatewayConnection, OnGatewayDisconnect {
       userConnected,
       users: filteredUsers,
     });
-    this.logger.log(`Client Connected: ${client.id}`);
-  }
 
-  private authenticateClient(client: Socket) {
-    const token = client.handshake.headers.authorization?.split(' ')[1];
-    return !token ? false : this.authService.decodeToken(token);
+    this.logger.log(`Client Connected: ${client.id}`);
   }
 
   private async filterUsers() {

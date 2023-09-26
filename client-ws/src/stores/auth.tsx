@@ -32,7 +32,9 @@ export const useAuthStore = create<AuthStore>((set) => ({
     const payload = Cookies.get("payload");
 
     if (token && payload) {
-      const socket = io(import.meta.env.VITE_BASE_URL, { auth: { token } });
+      const socket = io(import.meta.env.VITE_BASE_URL, {
+        extraHeaders: { Authorization: `Bearer ${token}` },
+      });
       api.defaults.headers["Authorization"] = `Bearer ${token}`;
       set({ socket, isAuthenticated: true, payload: JSON.parse(payload) });
     }
@@ -51,7 +53,7 @@ export const useAuthStore = create<AuthStore>((set) => ({
       });
 
       const socket = io(import.meta.env.VITE_BASE_URL, {
-        auth: { token: data.token },
+        extraHeaders: { Authorization: `Bearer ${data.token}` },
       });
       api.defaults.headers["Authorization"] = `Bearer ${data.token}`;
       set({ socket, isAuthenticated: true, payload: data.payload });
@@ -70,7 +72,7 @@ export const useAuthStore = create<AuthStore>((set) => ({
         expires: expirationTimeInDays,
       });
       const socket = io(import.meta.env.VITE_BASE_URL, {
-        auth: { token: data.token },
+        extraHeaders: { Authorization: `Bearer ${data.token}` },
       });
       api.defaults.headers["Authorization"] = `Bearer ${data.token}`;
       set({ socket, isAuthenticated: true, payload: data.payload });

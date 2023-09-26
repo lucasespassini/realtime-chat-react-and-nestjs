@@ -8,9 +8,7 @@ import { compareSync, hashSync } from 'bcryptjs';
 import { ulid } from 'ulid';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { AuthDto } from './dto/auth.dto';
-import { Payload, SocketUser } from './auth.interface';
-import { TokenExpiredError } from 'jsonwebtoken';
-import { WsException } from '@nestjs/websockets';
+import { Payload } from './types/auth';
 
 @Injectable()
 export class AuthService {
@@ -19,21 +17,9 @@ export class AuthService {
     private readonly prisma: PrismaService,
   ) {}
 
-  async decodeToken(token: string) {
-    const userDecoded: SocketUser = this.jwtService.verify(token);
-    const user = await this.prisma.users.findUnique({
-      select: { usr_id: true, usr_ulid: true, usr_username: true },
-      where: { usr_ulid: userDecoded.ulid },
-    });
-    return user;
-    // try {
-
-    // } catch (error) {
-    //   if (error instanceof TokenExpiredError)
-    //     return new WsException('Sessão expirada!');
-
-    //   return new WsException('Erro de autenticação.');
-    // }
+  isValidAuthHeader(authorization: string) {
+    const token = authorization.split(' ')[1];
+    return this.jwtService.verify<Payload>(token);
   }
 
   async signup(authDto: AuthDto) {
