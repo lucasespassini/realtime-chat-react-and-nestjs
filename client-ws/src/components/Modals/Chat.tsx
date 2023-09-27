@@ -21,7 +21,6 @@ import {
   forwardRef,
   useImperativeHandle,
   useCallback,
-  useEffect,
 } from "react";
 import { RiSendPlane2Fill } from "react-icons/ri";
 import { ModalHandle } from "../../constants/Types";
@@ -36,7 +35,7 @@ const ModalChat: ForwardRefRenderFunction<ModalHandle> = (_props, ref) => {
 
   const bottomRef = useRef<HTMLDivElement>(null);
   const messageInputRef = useRef<HTMLInputElement>(null);
-  console.log(user);
+
   useImperativeHandle(ref, () => ({
     onOpen,
     onClose,
@@ -59,12 +58,6 @@ const ModalChat: ForwardRefRenderFunction<ModalHandle> = (_props, ref) => {
 
     return () => socket.off("sendMessage");
   }, [scrollToBottom, socket, user]);
-
-  useEffect(() => {
-    socket.on("receivedMessage", (message) => {
-      console.log(message);
-    });
-  }, [socket]);
 
   return (
     <Modal isOpen={isOpen} onClose={onClose}>

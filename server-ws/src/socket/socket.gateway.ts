@@ -32,32 +32,14 @@ export class SocketGateway
   users: SocketUser[] = [];
 
   @WebSocketServer()
-  server: Server<any, ServerToClientEvents>;
+  server: Server<ServerToClientEvents>;
 
   afterInit(@ConnectedSocket() client: Socket) {
     client.use(SocketAuthMiddleware(this.authService) as any);
   }
 
-  async handleDisconnect(
-    @ConnectedSocket() client: Socket<any, ServerToClientEvents>,
-  ) {
-    const userDisconnected = this.users.find(
-      (user) => client.id === user.socketId,
-    );
-
-    this.users = this.users.filter((user) => user.socketId !== client.id);
-    const filteredUsers = await this.filterUsers();
-
-    client.broadcast.emit('userDisconnected', {
-      userDisconnected,
-      users: filteredUsers,
-    });
-
-    this.logger.log(`Client Disconnected: ${client.id}`);
-  }
-
   async handleConnection(
-    @ConnectedSocket() client: Socket<any, ServerToClientEvents>,
+    @ConnectedSocket() client: Socket<ServerToClientEvents>,
   ) {
     const { authorization } = client.handshake.headers;
     const user = this.authService.isValidAuthHeader(authorization);
@@ -72,7 +54,8 @@ export class SocketGateway
     this.users.push(userConnected);
     const filteredUsers = await this.filterUsers();
 
-    this.chatService.joinRoom(client, user.ulid);
+    const rooms = await this.chatService.findRooms(user.ulid);
+    rooms.map(async (room) => await client.join(room));
 
     this.server.emit('userConnected', {
       userConnected,
@@ -80,6 +63,24 @@ export class SocketGateway
     });
 
     this.logger.log(`Client Connected: ${client.id}`);
+  }
+
+  async handleDisconnect(
+    @ConnectedSocket() client: Socket<ServerToClientEvents>,
+  ) {
+    const userDisconnected = this.users.find(
+      (user) => client.id === user.socketId,
+    );
+
+    this.users = this.users.filter((user) => user.socketId !== client.id);
+    const filteredUsers = await this.filterUsers();
+
+    client.broadcast.emit('userDisconnected', {
+      userDisconnected,
+      users: filteredUsers,
+    });
+
+    this.logger.log(`Client Disconnected: ${client.id}`);
   }
 
   private async filterUsers() {
