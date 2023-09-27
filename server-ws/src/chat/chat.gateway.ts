@@ -21,14 +21,24 @@ export class ChatGateway {
   ) {}
 
   @SubscribeMessage('sendMessage')
-  sendMessage(
+  async sendMessage(
     @ConnectedSocket() client: Socket<any, ServerToClientEvents>,
     @MessageBody() payload: SendMessagePayload,
   ) {
     const { authorization } = client.handshake.headers;
     const authenticatedUser = this.authService.isValidAuthHeader(authorization);
-    console.log(client.rooms);
 
-    this.chatService.createMessage(authenticatedUser, payload);
+    const cvt_id = await this.chatService.createMessage(
+      authenticatedUser,
+      payload,
+    );
+
+    await client.join(cvt_id);
+
+    client.to(payload.user.socketId).emit('receivedMessage', {
+      message: payload.message,
+      user: payload.user,
+      conversationId: cvt_id,
+    });
   }
 }

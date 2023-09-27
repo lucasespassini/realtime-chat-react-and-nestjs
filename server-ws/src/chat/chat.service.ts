@@ -2,6 +2,8 @@ import { Injectable } from '@nestjs/common';
 import { Payload } from 'src/auth/types/auth';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { SendMessagePayload } from './types/messages';
+import { ulid } from 'ulid';
+import { DateTime } from 'luxon';
 
 @Injectable()
 export class ChatService {
@@ -20,7 +22,37 @@ export class ChatService {
     return rooms;
   }
 
-  createMessage(authenticatedUser: Payload, payload: SendMessagePayload) {
-    return;
+  async createMessage(authenticatedUser: Payload, payload: SendMessagePayload) {
+    const { usr_id: authenticatedUserId } = await this.prisma.users.findUnique({
+      select: { usr_id: true },
+      where: { usr_ulid: authenticatedUser.ulid },
+    });
+    const { usr_id: payloadId } = await this.prisma.users.findUnique({
+      select: { usr_id: true },
+      where: { usr_ulid: payload.user.ulid },
+    });
+
+    const { cvt_ulid } = await this.prisma.conversations.create({
+      data: {
+        cvt_ulid: ulid(),
+        messages: {
+          create: {
+            msg_usr_id: authenticatedUserId,
+            msg_content: payload.message,
+          },
+        },
+        conversation_participants: {
+          createMany: {
+            data: [
+              { cvp_usr_id: authenticatedUserId },
+              { cvp_usr_id: payloadId },
+            ],
+          },
+        },
+      },
+      select: { cvt_ulid: true },
+    });
+
+    return cvt_ulid;
   }
 }

@@ -53,7 +53,7 @@ const ModalChat: ForwardRefRenderFunction<ModalHandle> = (_props, ref) => {
       message,
       user,
     });
-
+    console.log("teste");
     scrollToBottom();
 
     return () => socket.off("sendMessage");

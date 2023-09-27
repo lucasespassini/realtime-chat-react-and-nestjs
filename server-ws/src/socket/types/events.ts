@@ -6,8 +6,14 @@ type ConnectionParams = {
   users: SocketUser[];
 };
 
+type ReceivedMessageParams = {
+  message: string;
+  user: SocketUser;
+  conversationId: string;
+};
+
 export interface ServerToClientEvents {
   userDisconnected: (connectionParams: ConnectionParams) => void;
   userConnected: (connectionParams: ConnectionParams) => void;
-  receivedMessage: () => void;
+  receivedMessage: (receivedMessageParams: ReceivedMessageParams) => void;
 }

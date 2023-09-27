@@ -23,17 +23,21 @@ model conversations {
   cvt_ulid                  String                      @unique(map: "UK_conversations_ulid") @db.VarChar(26)
   cvt_name                  String?                     @db.VarChar(100)
   conversation_participants conversation_participants[]
+  messages                  messages[]
 }
 
 model messages {
-  msg_id        Int       @id @default(autoincrement())
+  msg_id        Int           @id @default(autoincrement())
   msg_usr_id    Int
-  msg_content   String    @db.VarChar(255)
-  msg_read      Boolean?  @default(false)
-  msg_date_send DateTime? @default(now()) @db.Timestamp(0)
-  users         users     @relation(fields: [msg_usr_id], references: [usr_id], onDelete: NoAction, onUpdate: NoAction, map: "FK_messages_users")
+  msg_cvt_id    Int
+  msg_content   String        @db.VarChar(255)
+  msg_read      Boolean?      @default(false)
+  msg_date_send DateTime?     @default(now()) @db.Timestamp(0)
+  conversations conversations @relation(fields: [msg_cvt_id], references: [cvt_id], onDelete: NoAction, onUpdate: Restrict, map: "FK_messages_conversations")
+  users         users         @relation(fields: [msg_usr_id], references: [usr_id], onDelete: NoAction, onUpdate: NoAction, map: "FK_messages_users")
 
   @@index([msg_usr_id], map: "FK_messages_users")
+  @@index([msg_cvt_id], map: "FK_messages_conversations")
 }
 
 model users {

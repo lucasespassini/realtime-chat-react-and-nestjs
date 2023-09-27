@@ -5,7 +5,9 @@ export const ChatProvider = ({ children }: { children: JSX.Element }) => {
   const { socket } = useAuthStore();
 
   useEffect(() => {
-    socket?.on("receivedMessage", () => {});
+    socket?.on("receivedMessage", (data) => {
+      console.log(data);
+    });
   }, [socket]);
 
   return children;
