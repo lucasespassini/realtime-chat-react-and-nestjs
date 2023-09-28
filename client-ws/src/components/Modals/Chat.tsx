@@ -27,6 +27,7 @@ import { ModalHandle } from "../../constants/Types";
 import { Colors } from "../../constants/Colors";
 import { useChatStore } from "../../stores/chat";
 import { useAuthStore } from "../../stores/auth";
+import { queryClient } from "../../services/queryClient";
 
 const ModalChat: ForwardRefRenderFunction<ModalHandle> = (_props, ref) => {
   const { isOpen, onOpen, onClose } = useDisclosure();
@@ -53,7 +54,7 @@ const ModalChat: ForwardRefRenderFunction<ModalHandle> = (_props, ref) => {
       message,
       user,
     });
-    console.log("teste");
+
     scrollToBottom();
 
     return () => socket.off("sendMessage");

@@ -1,13 +1,10 @@
 import { Avatar, Box, Flex, Heading, Text } from "@chakra-ui/react";
+import { DateTime } from "luxon";
 import { Colors } from "../../constants/Colors";
-import { SocketUser } from "../../constants/Types";
 import { useChatStore } from "../../stores/chat";
+import { Conversation } from "../../query/useConversationsQuery";
 
-export const CardUserChat = (user: SocketUser) => {
-  const { username } = user;
-
-  const lastMessage = "Last messageeeeee e eeeeeeeee e e e e e";
-
+export const CardUserChat = (conversation: Conversation) => {
   const { setUser } = useChatStore();
 
   return (
@@ -18,7 +15,7 @@ export const CardUserChat = (user: SocketUser) => {
       cursor="pointer"
       transition=".2s"
       _hover={{ backgroundColor: Colors.SECONDARY }}
-      onClick={() => setUser(user)}
+      // onClick={() => setUser(user)}
     >
       <Avatar ml={5} size="md" />
 
@@ -31,32 +28,32 @@ export const CardUserChat = (user: SocketUser) => {
         gap={1}
         borderBottom={`1px solid ${Colors.BORDER_COLOR}`}
       >
-        <Heading fontSize="1rem">
-          {username.substring(0, 25).concat(username.length > 25 ? "..." : "")}
-        </Heading>
+        <Flex width="100%" pr={3} justifyContent="space-between">
+          <Heading fontSize="1rem">
+            {conversation?.conversation_participants[0]?.users?.usr_username
+              ?.substring(0, 25)
+              ?.concat(
+                conversation?.conversation_participants[0]?.users?.usr_username
+                  ?.length > 25
+                  ? "..."
+                  : ""
+              )}
+          </Heading>
+
+          <Text as="small">
+            {DateTime.fromISO(
+              conversation?.messages[0]?.msg_date_send
+            ).toFormat("HH:mm")}
+          </Text>
+        </Flex>
 
         <Text fontSize=".9rem">
-          {lastMessage
-            .substring(0, 27)
-            .concat(lastMessage.length > 27 ? "..." : "")}
+          {conversation?.messages[0]?.msg_content
+            ?.substring(0, 27)
+            ?.concat(
+              conversation?.messages[0]?.msg_content?.length > 27 ? "..." : ""
+            )}
         </Text>
-
-        <Box
-          position="absolute"
-          mr={4}
-          display="flex"
-          justifyContent="center"
-          alignItems="center"
-          top="calc(50% - 10px)"
-          right="0"
-          w="20px"
-          h="20px"
-          bgColor={Colors.BORDER_COLOR}
-          borderRadius={999}
-          fontSize=".9rem"
-        >
-          4
-        </Box>
       </Flex>
     </Flex>
   );

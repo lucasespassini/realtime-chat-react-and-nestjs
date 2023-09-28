@@ -10,13 +10,21 @@ export type SocketUser = {
   isOnline: boolean;
 };
 
-export type NewMessage = {
-  user: {
-    ulid: string;
-    username: string;
-  };
+export type ClientToServerEvents = {
+  sendMessage: (data: SendMessage) => void;
+  receivedMessage: (data: ReceivedMessage) => void;
+};
+
+export type SendMessage = {
+  conversationId?: string;
   message: string;
-  conversationUlid: string;
+  user: SocketUser;
+};
+
+export type ReceivedMessage = {
+  conversationId: string;
+  message: string;
+  user: SocketUser;
 };
 
 export type UserConnect = {
@@ -27,9 +35,4 @@ export type UserConnect = {
 export type UserDisconnect = {
   userDisconnected: SocketUser;
   users: SocketUser[];
-};
-
-export type ErrorMessage = {
-  error?: { status?: number };
-  message: string;
 };

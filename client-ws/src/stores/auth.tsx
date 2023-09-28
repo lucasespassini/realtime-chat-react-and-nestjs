@@ -2,6 +2,7 @@ import Cookies from "js-cookie";
 import { create } from "zustand";
 import { Socket, io } from "socket.io-client";
 import { api } from "../services/api";
+import { ClientToServerEvents } from "../constants/Types";
 
 type Payload = {
   ulid: string;
@@ -14,7 +15,7 @@ type AuthParams = {
 };
 
 type AuthStore = {
-  socket: Socket | null;
+  socket: Socket<ClientToServerEvents> | null;
   payload: Payload | null;
   isAuthenticated: boolean;
   authenticate: () => void;

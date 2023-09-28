@@ -11,6 +11,7 @@ import { WsJwtGuard } from 'src/auth/jwt/ws-jwt.guard';
 import { AuthService } from 'src/auth/auth.service';
 import { SendMessagePayload } from './types/messages';
 import { ChatService } from './chat.service';
+import { SocketGateway } from 'src/socket/socket.gateway';
 
 @WebSocketGateway()
 @UseGuards(WsJwtGuard)
@@ -18,6 +19,7 @@ export class ChatGateway {
   constructor(
     private readonly authService: AuthService,
     private readonly chatService: ChatService,
+    private readonly socketGateway: SocketGateway,
   ) {}
 
   @SubscribeMessage('sendMessage')
@@ -34,11 +36,13 @@ export class ChatGateway {
     );
 
     await client.join(cvt_id);
-
-    client.to(payload.user.socketId).emit('receivedMessage', {
-      message: payload.message,
-      user: payload.user,
-      conversationId: cvt_id,
-    });
+    this.socketGateway.server
+      .to(client.id)
+      .to(payload.user.socketId)
+      .emit('receivedMessage', {
+        message: payload.message,
+        user: payload.user,
+        conversationId: cvt_id,
+      });
   }
 }
