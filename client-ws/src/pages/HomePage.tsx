@@ -59,9 +59,9 @@ export const HomePage = () => {
             },
           }}
         >
-          {conversations?.map((conversation) => (
+          {/* {conversations?.map((conversation) => (
             <CardUserChat key={conversation.cvt_ulid} {...conversation} />
-          ))}
+          ))} */}
         </Flex>
       </Flex>
 

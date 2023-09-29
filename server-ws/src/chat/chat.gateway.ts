@@ -30,19 +30,14 @@ export class ChatGateway {
     const { authorization } = client.handshake.headers;
     const authenticatedUser = this.authService.isValidAuthHeader(authorization);
 
-    const cvt_id = await this.chatService.createMessage(
-      authenticatedUser,
-      payload,
-    );
+    await this.chatService.createMessage(authenticatedUser, payload);
 
-    await client.join(cvt_id);
     this.socketGateway.server
       .to(client.id)
       .to(payload.user.socketId)
       .emit('receivedMessage', {
         message: payload.message,
         user: payload.user,
-        conversationId: cvt_id,
       });
   }
 }

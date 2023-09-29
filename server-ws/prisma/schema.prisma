@@ -8,11 +8,12 @@ datasource db {
 }
 
 model conversation_participants {
-  cvp_id        Int           @id @default(autoincrement())
-  cvp_cvt_id    Int
-  cvp_usr_id    Int
-  conversations conversations @relation(fields: [cvp_cvt_id], references: [cvt_id], onDelete: NoAction, onUpdate: NoAction, map: "FK_conversation_participants_conversations")
-  users         users         @relation(fields: [cvp_usr_id], references: [usr_id], onDelete: NoAction, onUpdate: NoAction, map: "FK_conversation_participants_users")
+  cvp_id         Int           @id @default(autoincrement())
+  cvp_cvt_id     Int
+  cvp_usr_id     Int
+  cvp_entry_date DateTime?     @default(now()) @db.Timestamp(0)
+  conversations  conversations @relation(fields: [cvp_cvt_id], references: [cvt_id], onDelete: NoAction, onUpdate: NoAction, map: "FK_conversation_participants_conversations")
+  users          users         @relation(fields: [cvp_usr_id], references: [usr_id], onDelete: NoAction, onUpdate: NoAction, map: "FK_conversation_participants_users")
 
   @@index([cvp_cvt_id], map: "FK_conversation_participants_conversations")
   @@index([cvp_usr_id], map: "FK_conversation_participants_users")
@@ -27,24 +28,28 @@ model conversations {
 }
 
 model messages {
-  msg_id        Int           @id @default(autoincrement())
-  msg_usr_id    Int
-  msg_cvt_id    Int
-  msg_content   String        @db.VarChar(255)
-  msg_read      Boolean?      @default(false)
-  msg_date_send DateTime?     @default(now()) @db.Timestamp(0)
-  conversations conversations @relation(fields: [msg_cvt_id], references: [cvt_id], onDelete: NoAction, onUpdate: Restrict, map: "FK_messages_conversations")
-  users         users         @relation(fields: [msg_usr_id], references: [usr_id], onDelete: NoAction, onUpdate: NoAction, map: "FK_messages_users")
+  msg_id                                    Int            @id @default(autoincrement())
+  msg_usr_sender_id                         Int
+  msg_usr_received_id                       Int?
+  msg_cvt_id                                Int?
+  msg_content                               String         @db.VarChar(255)
+  msg_read                                  Boolean?       @default(false)
+  msg_date_send                             DateTime?      @default(now()) @db.Timestamp(0)
+  conversations                             conversations? @relation(fields: [msg_cvt_id], references: [cvt_id], onDelete: NoAction, onUpdate: Restrict, map: "FK_messages_conversations")
+  users_messages_msg_usr_received_idTousers users?         @relation("messages_msg_usr_received_idTousers", fields: [msg_usr_received_id], references: [usr_id], onDelete: NoAction, onUpdate: Restrict, map: "FK_messages_users_received")
+  users_messages_msg_usr_sender_idTousers   users          @relation("messages_msg_usr_sender_idTousers", fields: [msg_usr_sender_id], references: [usr_id], onDelete: NoAction, onUpdate: NoAction, map: "FK_messages_users_sender")
 
-  @@index([msg_usr_id], map: "FK_messages_users")
   @@index([msg_cvt_id], map: "FK_messages_conversations")
+  @@index([msg_usr_received_id], map: "FK_messages_users_received")
+  @@index([msg_usr_sender_id], map: "FK_messages_users_sender")
 }
 
 model users {
-  usr_id                    Int                         @id @default(autoincrement())
-  usr_ulid                  String                      @unique(map: "UK_users_ulid") @db.VarChar(26)
-  usr_username              String                      @unique(map: "UK_users_username") @db.VarChar(255)
-  usr_password              String                      @db.VarChar(255)
-  conversation_participants conversation_participants[]
-  messages                  messages[]
+  usr_id                                       Int                         @id @default(autoincrement())
+  usr_ulid                                     String                      @unique(map: "UK_users_ulid") @db.VarChar(26)
+  usr_username                                 String                      @unique(map: "UK_users_username") @db.VarChar(255)
+  usr_password                                 String                      @db.VarChar(255)
+  conversation_participants                    conversation_participants[]
+  messages_messages_msg_usr_received_idTousers messages[]                  @relation("messages_msg_usr_received_idTousers")
+  messages_messages_msg_usr_sender_idTousers   messages[]                  @relation("messages_msg_usr_sender_idTousers")
 }

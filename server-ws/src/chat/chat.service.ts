@@ -9,33 +9,70 @@ export class ChatService {
   constructor(private readonly prisma: PrismaService) {}
 
   async findAllConversations(user: Payload) {
-    return this.prisma.conversations.findMany({
+    return this.prisma.users.findMany({
       select: {
-        cvt_ulid: true,
-        messages: {
-          select: {
-            msg_content: true,
-            msg_date_send: true,
-            users: { select: { usr_ulid: true, usr_username: true } },
-          },
-          take: 1,
-          orderBy: { msg_id: 'desc' },
-        },
-        conversation_participants: {
-          select: { users: { select: { usr_ulid: true, usr_username: true } } },
-          where: { NOT: { users: { usr_ulid: user.ulid } } },
+        messages_messages_msg_usr_received_idTousers: {
+          where: {},
         },
       },
       where: {
-        conversation_participants: {
+        messages_messages_msg_usr_sender_idTousers: {
           some: {
-            users: { usr_ulid: user.ulid },
+            users_messages_msg_usr_sender_idTousers: { usr_ulid: user.ulid },
           },
         },
       },
-      // orderBy: {},
     });
+
+    // return this.prisma.messages.findMany({
+    //   select: {
+    //     msg_content: true,
+    //     msg_read: true,
+    //     msg_date_send: true,
+    //     users_messages_msg_usr_sender_idTousers: {
+    //       select: { usr_ulid: true, usr_username: true },
+    //     },
+    //   },
+    //   where: {
+    //     OR: [
+    //       {
+    //         users_messages_msg_usr_sender_idTousers: { usr_ulid: user.ulid },
+    //       },
+    //       {
+    //         users_messages_msg_usr_received_idTousers: { usr_ulid: user.ulid },
+    //       },
+    //     ],
+    //   },
+    // });
   }
+
+  // async findAllConversations(user: Payload) {
+  //   return this.prisma.conversations.findMany({
+  //     select: {
+  //       cvt_ulid: true,
+  //       messages: {
+  //         select: {
+  //           msg_content: true,
+  //           msg_date_send: true,
+  //           users: { select: { usr_ulid: true, usr_username: true } },
+  //         },
+  //         take: 1,
+  //         orderBy: { msg_id: 'desc' },
+  //       },
+  //       conversation_participants: {
+  //         select: { users: { select: { usr_ulid: true, usr_username: true } } },
+  //         where: { NOT: { users: { usr_ulid: user.ulid } } },
+  //       },
+  //     },
+  //     where: {
+  //       conversation_participants: {
+  //         some: {
+  //           users: { usr_ulid: user.ulid },
+  //         },
+  //       },
+  //     },
+  //   });
+  // }
 
   async findRooms(ulid: string) {
     const rooms: string[] = [];
@@ -51,36 +88,16 @@ export class ChatService {
   }
 
   async createMessage(authenticatedUser: Payload, payload: SendMessagePayload) {
-    const { usr_id: authenticatedUserId } = await this.prisma.users.findUnique({
-      select: { usr_id: true },
-      where: { usr_ulid: authenticatedUser.ulid },
-    });
-    const { usr_id: payloadId } = await this.prisma.users.findUnique({
-      select: { usr_id: true },
-      where: { usr_ulid: payload.user.ulid },
-    });
-
-    const { cvt_ulid } = await this.prisma.conversations.create({
+    await this.prisma.messages.create({
       data: {
-        cvt_ulid: ulid(),
-        messages: {
-          create: {
-            msg_usr_id: authenticatedUserId,
-            msg_content: payload.message,
-          },
+        msg_content: payload.message,
+        users_messages_msg_usr_sender_idTousers: {
+          connect: { usr_ulid: authenticatedUser.ulid },
         },
-        conversation_participants: {
-          createMany: {
-            data: [
-              { cvp_usr_id: authenticatedUserId },
-              { cvp_usr_id: payloadId },
-            ],
-          },
+        users_messages_msg_usr_received_idTousers: {
+          connect: { usr_ulid: payload.user.ulid },
         },
       },
-      select: { cvt_ulid: true },
     });
-
-    return cvt_ulid;
   }
 }

@@ -9,7 +9,6 @@ type ConnectionParams = {
 type ReceivedMessageParams = {
   message: string;
   user: SocketUser;
-  conversationId: string;
 };
 
 export interface ServerToClientEvents {
