@@ -47,8 +47,9 @@ model messages {
 model users {
   usr_id                                       Int                         @id @default(autoincrement())
   usr_ulid                                     String                      @unique(map: "UK_users_ulid") @db.VarChar(26)
-  usr_username                                 String                      @unique(map: "UK_users_username") @db.VarChar(255)
-  usr_password                                 String                      @db.VarChar(255)
+  usr_icon                                     String?                     @db.VarChar(255)
+  usr_username                                 String                      @unique(map: "UK_users_username") @db.VarChar(100)
+  usr_password                                 String                      @db.VarChar(100)
   conversation_participants                    conversation_participants[]
   messages_messages_msg_usr_received_idTousers messages[]                  @relation("messages_msg_usr_received_idTousers")
   messages_messages_msg_usr_sender_idTousers   messages[]                  @relation("messages_msg_usr_sender_idTousers")

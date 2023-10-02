@@ -2,16 +2,16 @@ import { Avatar, Flex, Heading } from "@chakra-ui/react";
 import { useState } from "react";
 import { Colors } from "../constants/Colors";
 import { CardUser } from "../components/Card/CardUser";
-import { CardUserChat } from "../components/Card/CardUserChat";
+// import { CardUserChat } from "../components/Card/CardUserChat";
 import { MessageInput } from "../components/Form/MessageInput";
-import { useConversationsQuery } from "../query/useConversationsQuery";
+// import { useConversationsQuery } from "../query/useConversationsQuery";
 import { useUserStore } from "../stores/user";
 import { useAuthStore } from "../stores/auth";
 
 export const HomePage = () => {
   const { users } = useUserStore();
   const { payload } = useAuthStore();
-  const { data: { conversations } = {} } = useConversationsQuery();
+  // const { data: { conversations } = {} } = useConversationsQuery();
 
   const [search, setSearch] = useState("");
 

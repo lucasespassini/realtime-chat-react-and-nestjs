@@ -1,5 +1,5 @@
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
-import { AuthPage } from "../pages/AuthPage";
+import { AuthPage } from "../pages/Auth/AuthPage";
 import { HomePage } from "../pages/HomePage";
 import { useAuthStore } from "../stores/auth";
 
@@ -13,20 +13,10 @@ export const AppRoutes = () => {
   const PrivateRoute = ({ children }: PrivateRouteProps) =>
     isAuthenticated ? children : <Navigate to="/auth" />;
 
-  const PublicRoute = ({ children }: PrivateRouteProps) =>
-    isAuthenticated ? <Navigate to="/" /> : children;
-
   return (
     <BrowserRouter>
       <Routes>
-        <Route
-          path="/auth"
-          element={
-            <PublicRoute>
-              <AuthPage />
-            </PublicRoute>
-          }
-        />
+        <Route path="/auth" element={<AuthPage />} />
         <Route
           path="/"
           element={
