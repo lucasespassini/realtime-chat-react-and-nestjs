@@ -7,7 +7,15 @@ import { SocketUser } from "../../constants/Types";
 import { PopoverUserActions } from "../Popover/UserActions";
 
 export const CardUserChat = (conversation: Conversation) => {
-  const user: SocketUser = conversation?.conversation_participants[0]?.users;
+  const user: SocketUser = {
+    usr_ulid: conversation?.conversation_participants[0]?.users.usr_ulid,
+    cvt_ulid: conversation?.cvt_ulid,
+    usr_socket_id:
+      conversation?.conversation_participants[0]?.users?.usr_socket_id,
+    usr_username:
+      conversation?.conversation_participants[0]?.users.usr_username,
+  };
+
   const { setUser } = useChatStore();
 
   return (

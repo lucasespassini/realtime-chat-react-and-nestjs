@@ -47,8 +47,8 @@ export class ChatService {
     });
   }
 
-  async findMessages(user: Payload) {
-    return this.prisma.messages.findMany({
+  async findMessages(user: Payload, conversationsULID: string) {
+    const messages = await this.prisma.messages.findMany({
       select: {
         msg_content: true,
         msg_read: true,
@@ -59,12 +59,12 @@ export class ChatService {
       },
       where: {
         conversations: {
-          conversation_participants: {
-            some: { users: { usr_ulid: user.ulid } },
-          },
+          cvt_ulid: conversationsULID,
         },
       },
     });
+
+    return messages;
   }
 
   async findRooms(usr_ulid: string) {
@@ -82,32 +82,39 @@ export class ChatService {
 
   async createMessage(authenticatedUser: Payload, payload: SendMessagePayload) {
     return this.prisma.$transaction(async (tx) => {
-      const { cvt_ulid } = await tx.conversations.create({
-        data: {
-          cvt_ulid: ulid(),
-          messages: {
-            create: {
-              msg_content: payload.message,
-              users: { connect: { usr_ulid: authenticatedUser.ulid } },
-            },
+      let cvt_ulid = payload.user.cvt_ulid;
+      if (!cvt_ulid) {
+        const conversations = await tx.conversations.create({
+          data: {
+            cvt_ulid: ulid(),
           },
+        });
+
+        cvt_ulid = conversations.cvt_ulid;
+
+        await Promise.all([
+          tx.conversation_participants.create({
+            data: {
+              users: { connect: { usr_ulid: authenticatedUser.ulid } },
+              conversations: { connect: { cvt_ulid } },
+            },
+          }),
+          tx.conversation_participants.create({
+            data: {
+              users: { connect: { usr_ulid: payload.user.usr_ulid } },
+              conversations: { connect: { cvt_ulid } },
+            },
+          }),
+        ]);
+      }
+
+      await tx.messages.create({
+        data: {
+          msg_content: payload.message,
+          users: { connect: { usr_ulid: authenticatedUser.ulid } },
+          conversations: { connect: { cvt_ulid } },
         },
       });
-
-      await Promise.all([
-        tx.conversation_participants.create({
-          data: {
-            users: { connect: { usr_ulid: authenticatedUser.ulid } },
-            conversations: { connect: { cvt_ulid } },
-          },
-        }),
-        tx.conversation_participants.create({
-          data: {
-            users: { connect: { usr_ulid: payload.user.usr_ulid } },
-            conversations: { connect: { cvt_ulid } },
-          },
-        }),
-      ]);
 
       return cvt_ulid;
     });

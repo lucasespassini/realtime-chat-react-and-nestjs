@@ -1,4 +1,4 @@
-import { Controller, Get, Req, UseGuards } from '@nestjs/common';
+import { Controller, Get, Param, Req, UseGuards } from '@nestjs/common';
 import { ChatService } from './chat.service';
 import { Request } from 'express';
 import { Payload } from 'src/auth/types/auth';
@@ -14,8 +14,14 @@ export class ChatController {
     return this.chatService.findAllConversations(req.user as Payload);
   }
 
-  @Get('/messages')
-  findMessages(@Req() req: Request) {
-    return this.chatService.findMessages(req.user as Payload);
+  @Get('/messages/:conversationsULID')
+  findMessages(
+    @Req() req: Request,
+    @Param('conversationsULID') conversationsULID: string,
+  ) {
+    return this.chatService.findMessages(
+      req.user as Payload,
+      conversationsULID,
+    );
   }
 }

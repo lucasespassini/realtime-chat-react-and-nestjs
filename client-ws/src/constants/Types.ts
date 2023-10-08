@@ -5,6 +5,7 @@ export type ModalHandle = {
 
 export type SocketUser = {
   usr_socket_id?: string;
+  cvt_ulid?: string;
   usr_ulid: string;
   usr_username: string;
 };

@@ -13,6 +13,7 @@ import {
   ModalFooter,
   ModalHeader,
   ModalOverlay,
+  Text,
   useDisclosure,
 } from "@chakra-ui/react";
 import {
@@ -21,17 +22,21 @@ import {
   forwardRef,
   useImperativeHandle,
   useCallback,
+  useEffect,
 } from "react";
 import { RiSendPlane2Fill } from "react-icons/ri";
 import { ModalHandle } from "../../constants/Types";
 import { Colors } from "../../constants/Colors";
 import { useChatStore } from "../../stores/chat";
 import { useAuthStore } from "../../stores/auth";
+import { useMessagesQuery } from "../../query/useMessagesQuery";
+import { DateTime } from "luxon";
 
 const ModalChat: ForwardRefRenderFunction<ModalHandle> = (_props, ref) => {
   const { isOpen, onOpen, onClose } = useDisclosure();
-  const { socket } = useAuthStore();
-  const { user } = useChatStore();
+  const { socket, payload } = useAuthStore();
+  const { user, setUser } = useChatStore();
+  const { data: { messages } = {} } = useMessagesQuery(user?.cvt_ulid);
 
   const bottomRef = useRef<HTMLDivElement>(null);
   const messageInputRef = useRef<HTMLInputElement>(null);
@@ -41,12 +46,11 @@ const ModalChat: ForwardRefRenderFunction<ModalHandle> = (_props, ref) => {
     onClose,
   }));
 
-  const scrollToBottom = useCallback(
-    () => bottomRef.current.scrollIntoView({ behavior: "smooth" }),
-    []
-  );
+  useEffect(() => {
+    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages]);
 
-  const sendMessage = useCallback(() => {
+  const sendMessage = useCallback(async () => {
     const message = messageInputRef.current.value;
 
     socket.emit("sendMessage", {
@@ -54,13 +58,16 @@ const ModalChat: ForwardRefRenderFunction<ModalHandle> = (_props, ref) => {
       user,
     });
 
-    scrollToBottom();
-
+    messageInputRef.current.value = "";
     return () => socket.off("sendMessage");
-  }, [scrollToBottom, socket, user]);
+  }, [socket, user]);
+
+  const resetModal = useCallback(() => {
+    setUser(null);
+  }, [setUser]);
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose}>
+    <Modal isOpen={isOpen} onClose={onClose} onCloseComplete={resetModal}>
       <ModalOverlay />
       <ModalContent
         maxW="40rem"
@@ -89,34 +96,51 @@ const ModalChat: ForwardRefRenderFunction<ModalHandle> = (_props, ref) => {
           </Flex>
         </ModalHeader>
 
-        <ModalBody display="flex" flexDir="column" gap={2} overflow="auto">
-          <Flex
-            alignSelf="flex-end"
-            maxW="75%"
-            p={4}
-            bg={Colors.SECONDARY}
-            borderRadius={10}
-            borderTopLeftRadius={0}
-          >
-            Lorem, ipsum dolor sit amet consectetur adipisicing elit. Cumque quo
-            amet, ex ullam ipsum quae, numquam quas eaque assumenda quibusdam
-            facilis nihil quaerat molestiae placeat repellendus. Illum esse
-            accusantium maxime!
-          </Flex>
-
-          <Flex
-            alignSelf="flex-start"
-            maxW="75%"
-            p={4}
-            bg={Colors.SECONDARY}
-            borderRadius={10}
-            borderTopLeftRadius={0}
-          >
-            Lorem, ipsum dolor sit amet consectetur adipisicing elit. Cumque quo
-            amet, ex ullam ipsum quae, numquam quas eaque assumenda quibusdam
-            facilis nihil quaerat molestiae placeat repellendus. Illum esse
-            accusantium maxime!
-          </Flex>
+        <ModalBody
+          display="flex"
+          flexDir="column"
+          gap={2}
+          overflow="auto"
+          css={{
+            "&::-webkit-scrollbar": {
+              width: "4px",
+            },
+            "&::-webkit-scrollbar-track": {
+              width: "6px",
+            },
+            "&::-webkit-scrollbar-thumb": {
+              background: Colors.SECONDARY,
+            },
+          }}
+        >
+          {messages?.map((message, i) => (
+            <Flex
+              key={i}
+              maxW="75%"
+              p={4}
+              alignSelf={
+                payload.ulid === message.users.usr_ulid
+                  ? "flex-end"
+                  : "flex-start"
+              }
+              flexDir="column"
+              bg={Colors.SECONDARY}
+              borderRadius={10}
+              borderTopLeftRadius={
+                payload.ulid === message.users.usr_ulid ? 10 : 0
+              }
+              borderTopRightRadius={
+                payload.ulid === message.users.usr_ulid ? 0 : 10
+              }
+            >
+              <Text>{message.msg_content}</Text>
+              <Box as="small" fontSize=".7rem" textAlign="end">
+                {DateTime.fromISO(message.msg_date_send).toFormat(
+                  "dd/MM/yyyy HH:mm"
+                )}
+              </Box>
+            </Flex>
+          ))}
 
           <Box ref={bottomRef} />
         </ModalBody>

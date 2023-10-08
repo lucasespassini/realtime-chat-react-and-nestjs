@@ -7,8 +7,8 @@ export const ChatProvider = ({ children }: { children: JSX.Element }) => {
 
   useEffect(() => {
     socket?.on("receivedMessage", () => {
-      console.log("receivedMessage");
       queryClient.invalidateQueries("conversations");
+      queryClient.invalidateQueries("messages");
     });
   }, [socket]);
 
