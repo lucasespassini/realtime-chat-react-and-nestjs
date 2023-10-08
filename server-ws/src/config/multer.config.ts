@@ -3,12 +3,8 @@ import { parse } from 'path';
 import { ulid } from 'ulid';
 
 function generateFilename(file: Express.Multer.File) {
-  const fileName = parse(file.originalname).name;
   const ext = parse(file.originalname).ext;
-  return `${fileName.replace(/[^a-zA-Z0-9]/g, '')}${ulid().replace(
-    /[^a-zA-Z0-9]/g,
-    '',
-  )}${ext}`;
+  return `${ulid()}${ext}`;
 }
 
 export const storage_icons = diskStorage({

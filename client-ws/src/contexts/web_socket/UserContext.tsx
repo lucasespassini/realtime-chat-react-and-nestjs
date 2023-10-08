@@ -13,9 +13,9 @@ export const UserProvider = ({ children }: { children: JSX.Element }) => {
     socket?.on("userConnected", (data: UserConnect) => {
       setUsers(data.users);
 
-      data.userConnected.socketId !== socket.id &&
+      data.userConnected.usr_socket_id !== socket.id &&
         toast({
-          description: `${data.userConnected.username} está online!`,
+          description: `${data.userConnected.usr_username} está online!`,
           isClosable: false,
           status: "info",
           duration: 3000,
@@ -28,7 +28,7 @@ export const UserProvider = ({ children }: { children: JSX.Element }) => {
       setUsers(data.users);
 
       toast({
-        description: `${data.userDisconnected.username} agora está offline!`,
+        description: `${data.userDisconnected.usr_username} agora está offline!`,
         isClosable: false,
         status: "info",
         duration: 3000,

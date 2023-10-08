@@ -34,7 +34,7 @@ export class ChatGateway {
 
     this.socketGateway.server
       .to(client.id)
-      .to(payload.user.socketId)
+      .to(payload.user.usr_socket_id)
       .emit('receivedMessage', {
         message: payload.message,
         user: payload.user,

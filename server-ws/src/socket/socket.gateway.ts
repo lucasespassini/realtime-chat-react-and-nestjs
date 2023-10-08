@@ -10,7 +10,6 @@ import { Injectable, Logger, UseGuards } from '@nestjs/common';
 import { Server, Socket } from 'socket.io';
 import { AuthService } from 'src/auth/auth.service';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { SocketUser } from 'src/auth/types/auth';
 import { SocketAuthMiddleware } from 'src/auth/jwt/ws.middleware';
 import { ServerToClientEvents } from './types/events';
 import { WsJwtGuard } from 'src/auth/jwt/ws-jwt.guard';
@@ -29,7 +28,6 @@ export class SocketGateway
   ) {}
 
   private logger: Logger = new Logger('SocketGateway');
-  users: SocketUser[] = [];
 
   @WebSocketServer()
   server: Server<ServerToClientEvents>;
@@ -44,22 +42,22 @@ export class SocketGateway
     const { authorization } = client.handshake.headers;
     const user = this.authService.isValidAuthHeader(authorization);
 
-    const userConnected: SocketUser = {
-      socketId: client.id,
-      ulid: user.ulid,
-      username: user.username,
-      isOnline: true,
-    };
+    const userConnected = await this.prisma.users.update({
+      select: { usr_socket_id: true, usr_ulid: true, usr_username: true },
+      data: { usr_socket_id: client.id },
+      where: { usr_ulid: user.ulid },
+    });
 
-    this.users.push(userConnected);
-    const filteredUsers = await this.filterUsers();
+    const users = await this.prisma.users.findMany({
+      select: { usr_socket_id: true, usr_ulid: true, usr_username: true },
+    });
 
     const rooms = await this.chatService.findRooms(user.ulid);
     rooms.map(async (room) => await client.join(room));
 
     this.server.emit('userConnected', {
       userConnected,
-      users: filteredUsers,
+      users,
     });
 
     this.logger.log(`Client Connected: ${client.id}`);
@@ -68,42 +66,24 @@ export class SocketGateway
   async handleDisconnect(
     @ConnectedSocket() client: Socket<ServerToClientEvents>,
   ) {
-    const userDisconnected = this.users.find(
-      (user) => client.id === user.socketId,
-    );
+    const { authorization } = client.handshake.headers;
+    const user = this.authService.isValidAuthHeader(authorization);
 
-    this.users = this.users.filter((user) => user.socketId !== client.id);
-    const filteredUsers = await this.filterUsers();
+    const userDisconnected = await this.prisma.users.update({
+      select: { usr_socket_id: true, usr_ulid: true, usr_username: true },
+      data: { usr_socket_id: null },
+      where: { usr_ulid: user.ulid },
+    });
+
+    const users = await this.prisma.users.findMany({
+      select: { usr_socket_id: true, usr_ulid: true, usr_username: true },
+    });
 
     client.broadcast.emit('userDisconnected', {
       userDisconnected,
-      users: filteredUsers,
+      users,
     });
 
     this.logger.log(`Client Disconnected: ${client.id}`);
-  }
-
-  private async filterUsers() {
-    const filteredUsers: SocketUser[] = [];
-    const users = await this.prisma.users.findMany({
-      select: { usr_ulid: true, usr_username: true },
-    });
-
-    for (const user of users) {
-      const matchUser = this.users.find(
-        (onlineUser) => onlineUser.ulid === user.usr_ulid,
-      );
-
-      matchUser
-        ? filteredUsers.unshift(matchUser)
-        : filteredUsers.push({
-            socketId: null,
-            ulid: user.usr_ulid,
-            username: user.usr_username,
-            isOnline: false,
-          });
-    }
-
-    return filteredUsers;
   }
 }

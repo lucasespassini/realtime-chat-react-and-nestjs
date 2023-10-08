@@ -4,10 +4,9 @@ export type ModalHandle = {
 };
 
 export type SocketUser = {
-  socketId?: string;
-  ulid: string;
-  username: string;
-  isOnline: boolean;
+  usr_socket_id?: string;
+  usr_ulid: string;
+  usr_username: string;
 };
 
 export type ClientToServerEvents = {

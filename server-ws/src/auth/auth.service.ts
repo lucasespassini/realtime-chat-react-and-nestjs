@@ -43,6 +43,7 @@ export class AuthService {
     const payload: Payload = {
       ulid: newUser.usr_ulid,
       username: newUser.usr_username,
+      icon: newUser.usr_icon,
     };
 
     return { token: this.jwtService.sign(payload), payload };
@@ -63,6 +64,7 @@ export class AuthService {
     const payload: Payload = {
       ulid: user.usr_ulid,
       username: user.usr_username,
+      icon: user.usr_icon,
     };
 
     return { token: this.jwtService.sign(payload), payload };

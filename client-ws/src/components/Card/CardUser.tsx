@@ -5,7 +5,7 @@ import { SocketUser } from "../../constants/Types";
 import { useChatStore } from "../../stores/chat";
 
 export const CardUser = (user: SocketUser) => {
-  const { username, isOnline } = user;
+  const { usr_username, usr_socket_id } = user;
 
   const { setUser } = useChatStore();
 
@@ -26,15 +26,19 @@ export const CardUser = (user: SocketUser) => {
         _hover={{ backgroundColor: Colors.BORDER_COLOR }}
         onClick={() => setUser(user)}
       >
-        <Avatar />
+        <Avatar
+          src={`${import.meta.env.VITE_BASE_URL}/users/icon/${
+            user.usr_username
+          }`}
+        />
 
         <Flex w="100%" flexDir="column" alignItems="flex-start" gap={2}>
           <Heading size="md">
-            {username.substring(0, 11)}
-            {username.length > 11 && "..."}
+            {usr_username.substring(0, 11)}
+            {usr_username.length > 11 && "..."}
           </Heading>
-          <Badge colorScheme={isOnline ? "green" : "red"} fontSize=".6rem">
-            {isOnline ? "Online" : "Offline"}
+          <Badge colorScheme={usr_socket_id ? "green" : "red"} fontSize=".6rem">
+            {usr_socket_id ? "Online" : "Offline"}
           </Badge>
         </Flex>
       </Flex>

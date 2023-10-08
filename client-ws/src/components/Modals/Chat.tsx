@@ -27,7 +27,6 @@ import { ModalHandle } from "../../constants/Types";
 import { Colors } from "../../constants/Colors";
 import { useChatStore } from "../../stores/chat";
 import { useAuthStore } from "../../stores/auth";
-import { queryClient } from "../../services/queryClient";
 
 const ModalChat: ForwardRefRenderFunction<ModalHandle> = (_props, ref) => {
   const { isOpen, onOpen, onClose } = useDisclosure();
@@ -73,15 +72,19 @@ const ModalChat: ForwardRefRenderFunction<ModalHandle> = (_props, ref) => {
         <ModalCloseButton />
 
         <ModalHeader display="flex" alignItems="center" gap={5}>
-          <Avatar />
+          <Avatar
+            src={`${import.meta.env.VITE_BASE_URL}/users/icon/${
+              user?.usr_username
+            }`}
+          />
 
           <Flex w="100%" flexDir="column" alignItems="flex-start" gap={1}>
-            <Heading size="md">{user?.username}</Heading>
+            <Heading size="md">{user?.usr_username}</Heading>
             <Badge
-              colorScheme={user?.isOnline ? "green" : "red"}
+              colorScheme={user?.usr_socket_id ? "green" : "red"}
               fontSize=".6rem"
             >
-              {user?.isOnline ? "Online" : "Offline"}
+              {user?.usr_socket_id ? "Online" : "Offline"}
             </Badge>
           </Flex>
         </ModalHeader>

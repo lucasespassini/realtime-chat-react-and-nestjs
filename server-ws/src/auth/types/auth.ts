@@ -1,11 +1,11 @@
 export interface Payload {
   ulid: string;
   username: string;
+  icon: string;
 }
 
 export interface SocketUser {
-  socketId?: string;
-  ulid: string;
-  username: string;
-  isOnline: boolean;
+  usr_ulid: string;
+  usr_socket_id: string;
+  usr_username: string;
 }

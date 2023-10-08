@@ -11,6 +11,7 @@ export type Conversation = {
     users: {
       usr_ulid: string;
       usr_username: string;
+      usr_socket_id?: string;
     };
   }[];
 };

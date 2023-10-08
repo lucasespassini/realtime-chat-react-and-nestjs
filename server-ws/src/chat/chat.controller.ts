@@ -13,4 +13,9 @@ export class ChatController {
   findAllConversations(@Req() req: Request) {
     return this.chatService.findAllConversations(req.user as Payload);
   }
+
+  @Get('/messages')
+  findMessages(@Req() req: Request) {
+    return this.chatService.findMessages(req.user as Payload);
+  }
 }

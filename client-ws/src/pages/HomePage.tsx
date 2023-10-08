@@ -2,16 +2,16 @@ import { Avatar, Flex, Heading } from "@chakra-ui/react";
 import { useState } from "react";
 import { Colors } from "../constants/Colors";
 import { CardUser } from "../components/Card/CardUser";
-// import { CardUserChat } from "../components/Card/CardUserChat";
+import { CardUserChat } from "../components/Card/CardUserChat";
 import { MessageInput } from "../components/Form/MessageInput";
-// import { useConversationsQuery } from "../query/useConversationsQuery";
+import { useConversationsQuery } from "../query/useConversationsQuery";
 import { useUserStore } from "../stores/user";
 import { useAuthStore } from "../stores/auth";
 
 export const HomePage = () => {
   const { users } = useUserStore();
   const { payload } = useAuthStore();
-  // const { data: { conversations } = {} } = useConversationsQuery();
+  const { data: { conversations } = {} } = useConversationsQuery();
 
   const [search, setSearch] = useState("");
 
@@ -19,7 +19,7 @@ export const HomePage = () => {
     search.length > 0
       ? users.filter(
           (user) =>
-            user.username.toUpperCase().indexOf(search.toUpperCase()) > -1
+            user.usr_username.toUpperCase().indexOf(search.toUpperCase()) > -1
         )
       : [];
 
@@ -39,7 +39,11 @@ export const HomePage = () => {
           bgColor={Colors.SECONDARY}
           borderBottom={`1px solid ${Colors.BORDER_COLOR}`}
         >
-          <Avatar />
+          <Avatar
+            src={`${import.meta.env.VITE_BASE_URL}/users/icon/${
+              payload.username
+            }`}
+          />
 
           <Heading size="md">{payload.username}</Heading>
         </Flex>
@@ -59,9 +63,9 @@ export const HomePage = () => {
             },
           }}
         >
-          {/* {conversations?.map((conversation) => (
+          {conversations?.map((conversation) => (
             <CardUserChat key={conversation.cvt_ulid} {...conversation} />
-          ))} */}
+          ))}
         </Flex>
       </Flex>
 
@@ -83,14 +87,14 @@ export const HomePage = () => {
           {filteredUsers.length > 0 || search.length > 0
             ? filteredUsers?.map(
                 (user) =>
-                  user.ulid !== payload.ulid && (
-                    <CardUser key={user.ulid} {...user} />
+                  user.usr_ulid !== payload.ulid && (
+                    <CardUser key={user.usr_ulid} {...user} />
                   )
               )
             : users?.map(
                 (user) =>
-                  user.ulid !== payload.ulid && (
-                    <CardUser key={user.ulid} {...user} />
+                  user.usr_ulid !== payload.ulid && (
+                    <CardUser key={user.usr_ulid} {...user} />
                   )
               )}
         </Flex>

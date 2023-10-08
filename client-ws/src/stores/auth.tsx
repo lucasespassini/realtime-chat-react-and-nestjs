@@ -7,6 +7,7 @@ import { ClientToServerEvents } from "../constants/Types";
 type Payload = {
   ulid: string;
   username: string;
+  icon?: string;
 };
 
 type AuthParams = {
@@ -15,7 +16,7 @@ type AuthParams = {
 };
 
 type AuthStore = {
-  socket: Socket<ClientToServerEvents> | null;
+  socket: Socket<any, ClientToServerEvents> | null;
   payload: Payload | null;
   isAuthenticated: boolean;
   authenticate: () => void;
